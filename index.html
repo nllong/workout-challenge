@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#fff4fb">
+<meta name="description" content="A cheerful monthly workout challenge with lighter deload days, timers, progress, and calendar reminders.">
+<title>Daily / Workout challenge</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<script defer src="core.js"></script>
+<script defer src="challenge.js"></script>
+<script defer src="joy.js"></script>
+<script defer src="app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to workout</a>
+<header class="site-header">
+  <a class="brand" href="./" aria-label="Daily — current challenge"><span class="brand-mark" aria-hidden="true">★</span> DAILY<span class="brand-dot">.</span></a>
+  <span class="header-note">SMALL WINS. HAPPY DAYS.</span>
+</header>
+<main id="main">
+  <div id="fatal" class="panel" hidden role="alert"></div>
+  <div id="challenge" hidden>
+    <section class="intro">
+      <div><p class="eyebrow" id="month-label"></p><h1><span id="hero-line">Small steps.</span><br><span id="hero-accent">Big smiles.</span></h1><p class="lede" id="hero-lede">A little movement. A little joy. You've got this!</p></div>
+      <div class="mascot-scene" aria-hidden="true">
+        <svg class="mascot" viewBox="0 0 210 180" xmlns="http://www.w3.org/2000/svg">
+          <path class="buddy-star" d="m27 21 4 9 10 1-8 7 2 10-9-5-9 5 2-10-8-7 11-1Z"/>
+          <path class="buddy-star" d="m183 57 3 7 8 1-6 5 1 8-7-4-7 4 2-8-6-6 8-1Z"/>
+          <ellipse class="buddy-shoe" cx="79" cy="160" rx="18" ry="8" transform="rotate(-12 79 160)"/>
+          <ellipse class="buddy-shoe" cx="131" cy="160" rx="18" ry="8" transform="rotate(12 131 160)"/>
+          <path class="buddy-body" d="M58 74C54 28 151 20 155 71l8 54c7 41-119 41-115 3Z"/>
+          <path class="buddy-headband" d="M58 64q44-17 97 0l1 15q-50-15-100 1Z"/>
+          <path class="buddy-arm" d="M50 105q-24 6-26-12m134 12q24-3 26-24m-163 7 4 7 7-4m147-14 5 7 6-4"/>
+          <circle class="buddy-eye" cx="84" cy="100" r="4"/><circle class="buddy-eye" cx="126" cy="100" r="4"/>
+          <path class="buddy-face" d="M94 115q11 13 23 0"/>
+          <ellipse class="buddy-cheek" cx="72" cy="112" rx="7" ry="4"/><ellipse class="buddy-cheek" cx="138" cy="112" rx="7" ry="4"/>
+          <text class="buddy-zzz" x="161" y="40">z Z</text>
+        </svg>
+        <p id="mascot-message" class="mascot-bubble">You've got this!</p>
+      </div>
+    </section>
+    <p id="date-notice" class="notice" hidden></p>
+    <div class="workout-layout">
+      <section class="day-panel panel" aria-labelledby="day-title">
+        <div class="day-top"><p class="eyebrow" id="day-kind"></p><a id="today-link" class="text-link" href="./">Back to today ↗</a></div>
+        <div class="day-heading"><h2 id="day-title"></h2><p id="day-date"></p></div>
+        <p id="day-instruction" class="muted"></p>
+        <section id="mode-banner" class="mode-banner" aria-labelledby="mode-title" hidden><h3 id="mode-title"></h3><p id="mode-copy"></p></section>
+        <aside class="daily-boost" aria-labelledby="encouragement-title">
+          <p class="eyebrow">YOUR DAILY BOOST</p>
+          <h3 id="encouragement-title"></h3>
+          <p id="encouragement-copy"></p>
+        </aside>
+        <div id="exercises"></div>
+        <div id="completed" class="completion" hidden role="status"></div>
+        <div id="finale-celebration" class="finale-celebration" hidden>
+          <span class="celebration-stars" aria-hidden="true">★ ★ ★</span>
+          <h3>Day 30. Done. High five!</h3>
+          <p>Your final workout deserves a big celebration. Take a moment to enjoy this win!</p>
+        </div>
+        <section id="tracker-checkin" class="tracker-checkin" aria-labelledby="tracker-title" hidden>
+          <p class="eyebrow">ONE LAST LITTLE CHECK-IN</p>
+          <h3 id="tracker-title">A note for your tracker chat</h3>
+          <p class="small muted">Answer these quick questions, then copy and paste your summary into your workout tracker chat.</p>
+          <label for="tracker-modified">Did you modify anything?</label>
+          <select id="tracker-modified">
+            <option value="">Choose an answer…</option>
+            <option value="no">No — completed as planned</option>
+            <option value="yes">Yes — I made changes</option>
+          </select>
+          <div id="tracker-modification-details" hidden>
+            <label for="tracker-modifications">What did you change?</label>
+            <textarea id="tracker-modifications" rows="3" maxlength="2000" placeholder="Actual reps or time, substitutions, skipped exercises, extra breaks…"></textarea>
+          </div>
+          <label for="tracker-rpe">Overall RPE <span id="tracker-rpe-optional" class="small" hidden>(optional on rest days)</span></label>
+          <p id="tracker-rpe-help" class="small muted">Rate the whole session: 0 = no effort, 10 = maximum effort.</p>
+          <select id="tracker-rpe" aria-describedby="tracker-rpe-help">
+            <option value="">Choose RPE…</option>
+            <option value="0">0 — No effort</option><option value="1">1</option>
+            <option value="2">2</option><option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+            <option value="8">8</option><option value="9">9</option><option value="10">10 — Maximum effort</option>
+          </select>
+          <p id="tracker-hint" class="small" role="status"></p>
+          <div id="tracker-preview" hidden>
+            <label for="tracker-note">Your tracker note</label>
+            <textarea id="tracker-note" rows="11" readonly spellcheck="false"></textarea>
+          </div>
+          <button id="tracker-copy" class="button" type="button" disabled>Copy tracker note</button>
+          <p id="tracker-copy-status" class="small" role="status"></p>
+        </section>
+        <div id="up-next" class="up-next" hidden></div>
+        <nav class="day-nav" aria-label="Workout days"><a id="previous" class="button secondary"></a><a id="next" class="button"></a></nav>
+      </section>
+      <aside class="progress-panel panel" aria-labelledby="progress-title">
+        <p class="eyebrow">THE BIG PICTURE</p><div class="progress-heading"><h2 id="progress-title">Your momentum</h2><span id="progress-count"></span></div>
+        <progress id="progress-bar" max="30" value="0" aria-label="Completed days"></progress>
+        <div id="progress-grid" class="progress-grid" aria-label="30-day progress"></div>
+        <div class="legend"><span><i class="legend-done"></i> Done</span><span><i class="legend-deload"></i> Deload</span><span><i class="legend-rest"></i> Rest</span><span><i class="legend-finale"></i> Finale</span><span id="test-legend" hidden><i class="legend-test"></i> Test</span></div>
+        <p class="small muted">Checkmarks and max logs stay in this browser. Day links carry the full challenge, so the workout opens on any device.</p>
+        <p id="storage-warning" class="notice small" hidden role="status">Browser storage is unavailable. You can still use the workout; progress will last only until this page closes.</p>
+      </aside>
+    </div>
+    <section class="calendar-panel panel" aria-labelledby="calendar-title">
+      <div><p class="eyebrow">MAKE ROOM FOR YOURSELF</p><h2 id="calendar-title">Put it on your calendar.</h2><p id="calendar-copy" class="muted"></p></div>
+      <button id="export" class="button" type="button">↓ Download calendar</button>
+      <details class="calendar-options"><summary>Calendar links &amp; format preview</summary>
+        <label for="site-url">Published site address</label>
+        <input id="site-url" type="url" inputmode="url" autocomplete="url" spellcheck="false">
+        <p class="small muted">Use the final GitHub Pages or custom-domain URL before downloading. Every event includes its day's complete plan link.</p>
+        <button id="validate" class="button secondary" type="button">Validate &amp; preview an event</button>
+        <p id="validation-result" role="status"></p><pre id="sample-event" tabindex="0" aria-label="Sample calendar event" hidden></pre>
+      </details>
+      <p id="calendar-status" class="small" role="status"></p>
+    </section>
+    <details class="plan-section" id="full-plan"><summary><span>The full 30-day plan</span><span class="muted small">See what's ahead +</span></summary>
+      <p id="plan-explainer" class="small muted"></p><div class="table-scroll" tabindex="0" role="region" aria-label="Full workout plan"><table id="plan-table"></table></div>
+    </details>
+    <footer><span>SMALL WINS DESERVE BIG HIGH FIVES.</span><span id="footer-month"></span></footer>
+  </div>
+</main>
+<canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true" hidden></canvas>
+<noscript><p class="panel">Enable JavaScript to view the challenge, run timers, and export reminders.</p></noscript>
+</body>
+</html>
