@@ -186,54 +186,99 @@
     return lines.join("\r\n");
   }
   function stamp(ms) { return new Date(ms).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, ""); }
-  function makeICS(c, base = CALENDAR_SITE_URL, now = Date.now()) {
-    validate(c); base = cleanBase(base);
-    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Daily Workout//30 Day Challenge//EN", "CALSCALE:GREGORIAN"];
-    for (const d of plan(c)) {
-      const link = dayUrl(base, c, d.day);
-      const start = wallToUtc(d.date, c.reminderTime, c.timeZone);
-      const title = summary(d);
-      const details = d.kind === "test" ? "Log your max for each exercise." : d.kind === "rest" ? "Rest day. Mark it complete on the site." : d.exercises.map(target).join("\n");
-      const description = c.title + "\n" + (d.kind === "deload" ? "Deload day! Lighter targets, full credit.\n" : d.kind === "finale" ? "The big finish! Complete the fixed targets below.\n" : "") + details + "\nReminder: " + c.reminderTime + " " + c.timeZone +
-        "\nOpen this day's workout:\n" + link;
-      lines.push("BEGIN:VEVENT", "UID:" + c.id + "-day-" + d.day + "@daily-workout.local",
-        "DTSTAMP:" + stamp(now), "DTSTART:" + stamp(start), "DTEND:" + stamp(start + 900000),
-        "SUMMARY:" + icsText(title), "DESCRIPTION:" + icsText(description), "URL:" + link,
-        "TRANSP:TRANSPARENT", "SEQUENCE:0", "BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:PT0S",
-        "DESCRIPTION:" + icsText(title), "END:VALARM", "END:VEVENT");
+  // A bounded VTIMEZONE includes the current offset and every clock change
+  // surrounding this 30-day series, so recurrence stays at the chosen local time.
+  function calendarTimeZone(c) {
+    const offsetAt = ms => partsMillis(zonedParts(ms, c.timeZone)) - ms;
+    const from = Date.parse(dateAt(c.startDate, -2) + "T00:00:00Z");
+    const until = Date.parse(dateAt(c.startDate, 32) + "T00:00:00Z");
+    const step = 6 * 3600000;
+    let offset = offsetAt(from);
+    const changes = [{ at: from, before: offset, after: offset, kind: "STANDARD" }];
+    for (let cursor = from + step; cursor <= until; cursor += step) {
+      const next = offsetAt(cursor);
+      if (next === offset) continue;
+      let low = cursor - step, high = cursor;
+      while (high - low > 1000) {
+        const mid = Math.floor((low + high) / 2000) * 1000;
+        if (offsetAt(mid) === offset) low = mid; else high = mid;
+      }
+      changes.push({ at: high, before: offset, after: next, kind: next > offset ? "DAYLIGHT" : "STANDARD" });
+      offset = next;
     }
-    lines.push("END:VCALENDAR");
+    const utcOffset = ms => {
+      const seconds = Math.round(Math.abs(ms) / 1000);
+      return (ms < 0 ? "-" : "+") + pad(Math.floor(seconds / 3600)) + pad(Math.floor(seconds / 60) % 60) + (seconds % 60 ? pad(seconds % 60) : "");
+    };
+    const lines = ["BEGIN:VTIMEZONE", "TZID:" + icsText(c.timeZone)];
+    changes.forEach(change => lines.push("BEGIN:" + change.kind,
+      "DTSTART:" + stamp(change.at + change.before).replace(/Z$/, ""),
+      "TZOFFSETFROM:" + utcOffset(change.before), "TZOFFSETTO:" + utcOffset(change.after),
+      "TZNAME:" + icsText(c.timeZone), "END:" + change.kind));
+    lines.push("END:VTIMEZONE");
+    return lines;
+  }
+  function makeICS(c, base = CALENDAR_SITE_URL, now = Date.now()) {
+    validate(c);
+    const link = cleanBase(base), title = "Daily Workout Challenge";
+    // Reject reminder times that fall into a missing spring-forward hour.
+    for (let i = 0; i < 30; i++) wallToUtc(dateAt(c.startDate, i), c.reminderTime, c.timeZone);
+    const tzid = /^[A-Za-z0-9_+/-]+$/.test(c.timeZone) ? c.timeZone : '"' + c.timeZone + '"';
+    const localStart = c.startDate.replace(/-/g, "") + "T" + c.reminderTime.replace(":", "") + "00";
+    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Daily Workout//Daily Workout Challenge//EN", "CALSCALE:GREGORIAN",
+      ...calendarTimeZone(c),
+      "BEGIN:VEVENT", "UID:" + c.id + "-daily@daily-workout.local", "DTSTAMP:" + stamp(now),
+      "DTSTART;TZID=" + tzid + ":" + localStart, "DURATION:PT15M", "RRULE:FREQ=DAILY;COUNT=30",
+      "SUMMARY:" + title, "DESCRIPTION:" + icsText(link), "URL:" + link,
+      "TRANSP:TRANSPARENT", "SEQUENCE:0", "BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:PT0S",
+      "DESCRIPTION:" + title, "END:VALARM", "END:VEVENT", "END:VCALENDAR"];
     return lines.map(foldLine).join("\r\n") + "\r\n";
   }
   function inspectICS(ics) {
     if (!ics.endsWith("\r\n") || /(?<!\r)\n|\r(?!\n)/.test(ics)) fail("Calendar must use CRLF line endings.");
     const physical = ics.split("\r\n").slice(0, -1);
-    if (physical.some(l => encoder.encode(l).length > 75)) fail("A physical line exceeds 75 octets.");
+    if (physical.some(line => encoder.encode(line).length > 75)) fail("A physical line exceeds 75 octets.");
     const unfolded = ics.replace(/\r\n[ \t]/g, "");
     if (!unfolded.startsWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\n") || !unfolded.endsWith("END:VCALENDAR\r\n")) fail("Missing calendar wrapper.");
     const events = [...unfolded.matchAll(/BEGIN:VEVENT\r\n([\s\S]*?)END:VEVENT\r\n/g)].map(m => m[1]);
-    if (events.length !== 30) fail("Expected exactly 30 events.");
-    const uids = new Set();
-    for (const e of events) {
-      const props = {};
-      e.split("\r\n").filter(Boolean).forEach(l => { const i = l.indexOf(":"); (props[l.slice(0, i)] ||= []).push(l.slice(i + 1)); });
-      for (const k of ["UID", "DTSTAMP", "DTSTART", "DTEND", "SUMMARY", "URL"]) if (props[k]?.length !== 1) fail("Missing or duplicate " + k);
-      if (uids.has(props.UID[0])) fail("Duplicate UID."); uids.add(props.UID[0]);
-      const parse = s => {
-        if (!/^\d{8}T\d{6}Z$/.test(s)) fail("Expected UTC timestamps.");
-        return Date.parse(s.slice(0,4) + "-" + s.slice(4,6) + "-" + s.slice(6,8) + "T" + s.slice(9,11) + ":" + s.slice(11,13) + ":" + s.slice(13,15) + "Z");
-      };
-      parse(props.DTSTAMP[0]);
-      if (parse(props.DTEND[0]) - parse(props.DTSTART[0]) !== 900000) fail("Expected 15-minute events.");
-      if (!e.includes("BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\n") || !e.includes("END:VALARM\r\n")) fail("Missing start-time alert.");
-      if (!props.DESCRIPTION?.[0].includes(icsText(props.URL[0]))) fail("Description must include the plain-text URL.");
-      const u = new URL(props.URL[0]);
-      const c = decodeConfig(u.searchParams.get("plan"));
-      const n = Number(u.searchParams.get("day"));
-      if (!Number.isInteger(n) || n < 1 || n > 30 || props.SUMMARY[0] !== icsText(summary(plan(c)[n - 1]))) fail("Event link or targets do not match the plan.");
+    if (events.length !== 1) fail("Expected one recurring event.");
+    const event = events[0], alarms = [...event.matchAll(/BEGIN:VALARM\r\n([\s\S]*?)END:VALARM\r\n/g)];
+    if (alarms.length !== 1 || !alarms[0][1].includes("ACTION:DISPLAY\r\nTRIGGER:PT0S\r\n") ||
+        !alarms[0][1].includes("DESCRIPTION:Daily Workout Challenge\r\n")) fail("Missing start-time alert.");
+    const props = {}, headers = {};
+    event.replace(alarms[0][0], "").split("\r\n").filter(Boolean).forEach(line => {
+      let quoted = false, separator = -1;
+      for (let i = 0; i < line.length; i++) {
+        if (line[i] === '"') quoted = !quoted;
+        if (line[i] === ":" && !quoted) { separator = i; break; }
+      }
+      if (separator < 0) fail("Invalid calendar property.");
+      const header = line.slice(0, separator), name = header.split(";")[0];
+      (props[name] ||= []).push(line.slice(separator + 1)); headers[name] = header;
+    });
+    for (const key of ["UID", "DTSTAMP", "DTSTART", "DURATION", "RRULE", "SUMMARY", "DESCRIPTION", "URL"]) {
+      if (props[key]?.length !== 1) fail("Missing or duplicate " + key);
     }
-    return { count: events.length, maxOctets: Math.max(...physical.map(l => encoder.encode(l).length)),
-      sample: "BEGIN:VEVENT\r\n" + events[0] + "END:VEVENT", unfolded };
+    if (!/^\d{8}T\d{6}Z$/.test(props.DTSTAMP[0])) fail("Expected a UTC DTSTAMP.");
+    if (props.DURATION[0] !== "PT15M") fail("Expected a 15-minute duration.");
+    if (props.RRULE[0] !== "FREQ=DAILY;COUNT=30") fail("Expected 30 daily occurrences.");
+    if (props.SUMMARY[0] !== "Daily Workout Challenge") fail("Unexpected recurring event title.");
+    const link = props.URL[0];
+    if (cleanBase(link) !== link || new URL(link).search || new URL(link).hash) fail("The event must link directly to the website.");
+    if (props.DESCRIPTION[0] !== icsText(link)) fail("Description must contain only the website link.");
+    const tz = headers.DTSTART.match(/^DTSTART;TZID=(?:"([^"]+)"|(.+))$/);
+    if (!tz || !/^\d{8}T\d{6}$/.test(props.DTSTART[0])) fail("Expected a local DTSTART with TZID.");
+    const zone = tz[1] || tz[2], value = props.DTSTART[0];
+    const date = value.slice(0, 4) + "-" + value.slice(4, 6) + "-" + value.slice(6, 8);
+    const time = value.slice(9, 11) + ":" + value.slice(11, 13);
+    wallToUtc(date, time, zone);
+    const zones = [...unfolded.matchAll(/BEGIN:VTIMEZONE\r\n([\s\S]*?)END:VTIMEZONE\r\n/g)];
+    if (zones.length !== 1 || !zones[0][1].startsWith("TZID:" + icsText(zone) + "\r\n")) fail("Missing matching VTIMEZONE.");
+    const observances = [...zones[0][1].matchAll(/BEGIN:(STANDARD|DAYLIGHT)\r\n([\s\S]*?)END:\1\r\n/g)];
+    if (!observances.length || observances.some(m => !/^DTSTART:\d{8}T\d{6}\r$/m.test(m[2]) ||
+        !/^TZOFFSETFROM:[+-]\d{4}(?:\d{2})?\r$/m.test(m[2]) || !/^TZOFFSETTO:[+-]\d{4}(?:\d{2})?\r$/m.test(m[2]))) fail("Invalid timezone observance.");
+    return { count: 1, occurrences: 30, timeZone: zone, maxOctets: Math.max(...physical.map(line => encoder.encode(line).length)),
+      sample: "BEGIN:VEVENT\r\n" + event + "END:VEVENT", unfolded };
   }
   return { CALENDAR_SITE_URL, trackerNote, validate, duration, dateAt, encodeConfig, decodeConfig, plan, target, summary, cleanBase, dayUrl, wallToUtc, localDate, currentDay,
     icsText, foldLine, makeICS, inspectICS };

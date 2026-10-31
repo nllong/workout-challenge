@@ -288,13 +288,13 @@
     const status = $("calendar-status");
     try {
       const ics = C.makeICS(config), report = C.inspectICS(ics);
-      $("validation-result").textContent = "Passed: " + report.count + " events · 15 minutes each · start-time alerts · CRLF · UTF-8 lines ≤ " + report.maxOctets + " octets · complete plan links.";
+      $("validation-result").textContent = "Passed: 1 recurring event · " + report.occurrences + " days · 15 minutes each · start-time alert · " + report.timeZone + " · website link.";
       $("sample-event").textContent = report.sample; $("sample-event").hidden = false;
       if (previewOnly) { status.textContent = "Calendar validated. The sample below is unfolded for readability."; return; }
       const blobUrl = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
       const link = el("a"); link.href = blobUrl; link.download = config.id + ".ics"; document.body.append(link); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-      status.textContent = "Downloaded 30 reminders. Import the file into your calendar and enable calendar notifications.";
+      status.textContent = "Downloaded one recurring reminder for 30 days. Import it into your calendar and enable notifications.";
     } catch (err) { status.textContent = err.message; }
   }
   try {
@@ -311,7 +311,7 @@
     $("month-label").textContent = config.title + " / " + formatDate(config.startDate, { year: "numeric" });
     $("footer-month").textContent = formatDate(config.startDate, { month: "long", year: "numeric" }) + " / 30 DAYS";
     const [hours, minutes] = config.reminderTime.split(":").map(Number);
-    $("calendar-copy").textContent = "30 daily reminders. " + (hours % 12 || 12) + ":" + String(minutes).padStart(2, "0") + (hours < 12 ? " AM" : " PM") + " · " + config.timeZone + ". Each opens that day's workout.";
+    $("calendar-copy").textContent = "Daily reminder for 30 days. " + (hours % 12 || 12) + ":" + String(minutes).padStart(2, "0") + (hours < 12 ? " AM" : " PM") + " · " + config.timeZone + ". Open the site to see today's challenge.";
     renderPlan(); renderDay();
     $("tracker-modified").addEventListener("change", saveTrackerCheckIn);
     $("tracker-modifications").addEventListener("input", saveTrackerCheckIn);
