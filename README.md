@@ -15,7 +15,7 @@ A cheerful, phone-friendly 30-day workout challenge. Open today's workout, start
 
 ![Illustration of a deload workout and the day-30 celebration](docs/images/challenge-preview.svg)
 
-Looking ahead requires confirmation and a one-minute wait. Progress and workout check-ins are saved in the browser you use. Keep the page open for timer alerts; phone sleep can delay them. Optional browser alerts can be enabled under **Timer sound & alerts**.
+Looking ahead asks for confirmation so you can keep the surprise. Progress and workout check-ins are saved in the browser you use. Keep the page open for timer alerts; phone sleep can delay them. Optional browser alerts can be enabled under **Timer sound & alerts**.
 
 ## Run or update
 

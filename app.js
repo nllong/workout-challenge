@@ -43,7 +43,7 @@
   }
   function resetAllProgress() {
     if (!window.confirm("Reset all 30 days of " + config.title + " in this browser? This clears checkmarks, max logs, modifications, and RPE entries, and stops running timers. This cannot be undone.")) return;
-    logs = {};
+    logs = {}; previewedDays.clear();
     write(storageKey, logs);
     renderDay();
     $("reset-status").textContent = storageFailed
@@ -56,17 +56,14 @@
     return d.exercises.every(e => log["done" + e.index] === true &&
       (d.kind !== "test" || (Number.isInteger(log["max" + e.index]) && log["max" + e.index] >= 0)));
   }
-  function canViewDay(n) { return Number.isInteger(n) && n >= 1 && n <= 30 && (n === today.day || isComplete(n)); }
-  let previewDeadline = 0, previewInterval = null, previewGeneration = 0;
-  function cancelPreviewWait() {
-    if (previewInterval !== null) clearInterval(previewInterval);
-    previewInterval = null; previewDeadline = 0; previewGeneration++;
-    $("spoiler-confirm").disabled = false;
-    $("spoiler-wait").hidden = true;
-    if ($("plan-reveal").hidden) $("plan-preview-label").textContent = "See what's ahead +";
+  const previewedDays = new Set();
+  let pendingPreview = null;
+  function isUnlockedDay(n) {
+    return Number.isInteger(n) && n >= 1 && n <= 30 && (n === today.day || isComplete(n));
   }
+  function canViewDay(n) { return isUnlockedDay(n) || previewedDays.has(n); }
   function closeSpoilerDialog() {
-    cancelPreviewWait();
+    pendingPreview = null;
     const dialog = $("spoiler-dialog");
     if (dialog.open) dialog.close();
   }
@@ -78,36 +75,29 @@
     $("plan-preview").setAttribute("aria-expanded", "false");
     $("plan-preview-label").textContent = "See what's ahead +";
   }
-  function requestPlanPreview() {
-    if (!$("plan-reveal").hidden) { hidePlanPreview(); return; }
-    if (previewDeadline) { closeSpoilerDialog(); return; }
-    cancelPreviewWait();
+  function confirmPreview() {
+    const action = pendingPreview;
+    closeSpoilerDialog();
+    if (action) action();
+  }
+  function askToPreview(action, subject) {
+    pendingPreview = action;
+    $("spoiler-copy").textContent = "It's better to be surprised by what's next. Are you sure you want to see " + subject + "?";
     const dialog = $("spoiler-dialog");
     if (typeof dialog.showModal === "function") dialog.showModal();
-    else if (window.confirm("It's better to be surprised by what's next. Are you sure you want to see the full plan after a one-minute wait?")) beginPreviewWait();
+    else if (window.confirm($("spoiler-copy").textContent)) confirmPreview();
+    else pendingPreview = null;
   }
-  function beginPreviewWait() {
-    if (previewDeadline) return;
-    previewDeadline = Date.now() + 60000;
-    const generation = ++previewGeneration;
-    $("spoiler-confirm").disabled = true;
-    $("spoiler-wait").hidden = false;
-    function tick() {
-      if (!previewDeadline || generation !== previewGeneration) return;
-      const remaining = Math.max(0, previewDeadline - Date.now());
-      $("spoiler-countdown").textContent = formatTime(Math.ceil(remaining / 1000));
-      $("plan-preview-label").textContent = "Cancel peek (" + formatTime(Math.ceil(remaining / 1000)) + ")";
-      if (remaining > 0) return;
-      closeSpoilerDialog();
+  function requestPlanPreview() {
+    if (!$("plan-reveal").hidden) { hidePlanPreview(); return; }
+    askToPreview(() => {
       renderPlan();
       $("plan-reveal").hidden = false;
       $("plan-preview").setAttribute("aria-expanded", "true");
       $("plan-preview-label").textContent = "Hide the plan −";
       $("plan-reveal").focus({ preventScroll: true });
       $("plan-reveal").scrollIntoView({ behavior: "auto", block: "start" });
-    }
-    previewInterval = setInterval(tick, 250);
-    tick();
+    }, "the full plan");
   }
   function internalUrl(n) { return C.dayUrl(location.href, config, n); }
   function goLink(node, n, label) { node.href = internalUrl(n); node.dataset.day = String(n); if (label) node.textContent = label; }
@@ -254,12 +244,12 @@
     if (done && selected < 30) {
       const nextDay = days[selected];
       teaser.append(el("p", "eyebrow", "ONE DAY AT A TIME"));
-      if (canViewDay(nextDay.day)) {
+      if (isUnlockedDay(nextDay.day)) {
         teaser.append(el("p", "", "This day is already unlocked."));
         const link = el("a", "text-link", "Open day " + nextDay.day + " →");
         goLink(link, nextDay.day); teaser.append(link);
       } else {
-        teaser.append(el("p", "", "Your next day unlocks on " + formatDate(nextDay.date, { month: "long", day: "numeric" }) + ". Keep it a surprise!"));
+        teaser.append(el("p", "", "Your next day unlocks on " + formatDate(nextDay.date, { month: "long", day: "numeric" }) + ". Use Next day if you want to confirm a peek."));
       }
     } else if (done) {
       teaser.append(el("p", "", "Days completed: " + days.filter(x => isComplete(x.day)).length + " of 30. You can revisit any day in the progress grid."));
@@ -275,7 +265,7 @@
     $("progress-bar").value = completed;
     const grid = $("progress-grid"); grid.replaceChildren();
     days.forEach(d => {
-      const done = isComplete(d.day), allowed = canViewDay(d.day);
+      const done = isComplete(d.day), allowed = isUnlockedDay(d.day);
       const cell = el(allowed ? "a" : "button", "grid-day" + (done ? " complete" : "") + (d.day === selected ? " selected" : ""), String(d.day).padStart(2, "0"));
       if (allowed) goLink(cell, d.day);
       else { cell.type = "button"; cell.disabled = true; }
@@ -304,9 +294,8 @@
     const previousDay = days.filter(item => item.day < selected && isComplete(item.day)).pop();
     $("previous").hidden = !previousDay;
     if (previousDay) goLink($("previous"), previousDay.day, "← Completed day " + previousDay.day);
-    const nextDay = days.find(item => item.day > selected && canViewDay(item.day));
-    $("next").hidden = !nextDay;
-    if (nextDay) goLink($("next"), nextDay.day, nextDay.day === today.day ? "Today →" : "Completed day " + nextDay.day + " →");
+    $("next").hidden = selected === 30;
+    if (selected < 30) goLink($("next"), selected + 1, "Next day →");
     renderExercises(d); renderProgress(); restoreTrackerCheckIn(); updateCompletion();
   }
   function renderPlan() {
@@ -315,7 +304,7 @@
     head.append(row); const body = document.createElement("tbody");
     days.forEach(d => {
       const tr = el("tr", d.kind), th = el("th"); th.scope = "row";
-      if (canViewDay(d.day)) { const link = el("a", "", String(d.day).padStart(2, "0")); goLink(link, d.day); th.append(link); }
+      if (isUnlockedDay(d.day)) { const link = el("a", "", String(d.day).padStart(2, "0")); goLink(link, d.day); th.append(link); }
       else th.textContent = String(d.day).padStart(2, "0");
       tr.append(th);
       tr.append(el("td", "", formatDate(d.date, { month: "short", day: "numeric" })), el("td", "session " + d.kind, sessionLabel(d)));
@@ -390,9 +379,9 @@
     $("calendar-copy").textContent = "Daily reminder for 30 days. " + (hours % 12 || 12) + ":" + String(minutes).padStart(2, "0") + (hours < 12 ? " AM" : " PM") + " · " + config.timeZone + ". Open the site to see today's challenge.";
     renderDay();
     $("plan-preview").addEventListener("click", requestPlanPreview);
-    $("spoiler-confirm").addEventListener("click", beginPreviewWait);
+    $("spoiler-confirm").addEventListener("click", confirmPreview);
     $("spoiler-cancel").addEventListener("click", closeSpoilerDialog);
-    $("spoiler-dialog").addEventListener("close", cancelPreviewWait);
+    $("spoiler-dialog").addEventListener("close", () => { pendingPreview = null; });
     $("tracker-modified").addEventListener("change", saveTrackerCheckIn);
     $("tracker-modifications").addEventListener("input", saveTrackerCheckIn);
     $("tracker-rpe").addEventListener("change", saveTrackerCheckIn);
@@ -403,8 +392,16 @@
     document.addEventListener("click", event => {
       const link = event.target.closest("a[data-day]");
       if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault(); selected = Number(link.dataset.day); history.pushState({}, "", link.href); renderDay();
-      $("day-title").tabIndex = -1; $("day-title").focus({ preventScroll: true }); $("day-title").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+      event.preventDefault();
+      const targetDay = Number(link.dataset.day);
+      const navigate = () => {
+        if (!isUnlockedDay(targetDay)) previewedDays.add(targetDay);
+        selected = targetDay; history.pushState({}, "", link.href); renderDay();
+        $("day-title").tabIndex = -1; $("day-title").focus({ preventScroll: true }); $("day-title").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+      };
+      if (isUnlockedDay(targetDay)) navigate();
+      else askToPreview(navigate, "day " + targetDay);
+
     });
     window.addEventListener("popstate", () => {
       const value = new URLSearchParams(location.search).get("day");
