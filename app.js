@@ -3,7 +3,11 @@
   const C = window.WorkoutCore;
   const Joy = window.WorkoutJoy;
   const finaleParty = Joy.createCelebration(document.getElementById("confetti-canvas"));
-  const $ = id => document.getElementById(id);
+  const $ = id => {
+    const node = document.getElementById(id);
+    if (!node) throw new Error("This page is missing #" + id + ". Reload the page to get the latest version. Your saved progress is kept.");
+    return node;
+  };
   const timerAlerts = window.WorkoutAlerts.create(window, document);
   const el = (tag, cls, text) => {
     const node = document.createElement(tag);
@@ -434,6 +438,7 @@
     window.addEventListener("pagehide", () => { disposeTimers(); finaleParty.stop(); hidePlanPreview(); });
     window.addEventListener("pageshow", event => { if (event.persisted) { refreshDate(); renderDay(); } });
   } catch (err) {
+    console.error("Workout challenge could not start:", err);
     $("challenge").hidden = true; const box = $("fatal"); box.hidden = false;
     box.append(el("h1", "", "Let's get you back on track."), el("p", "", err.message));
     const home = el("a", "button", "Open current challenge"); home.href = location.pathname; box.append(home);
