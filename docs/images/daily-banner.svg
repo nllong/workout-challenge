@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="380" viewBox="0 0 1200 380" role="img" aria-labelledby="title desc">
+<title id="title">Daily: small wins, happy days</title>
+<desc id="desc">A pink and lavender banner with the app's smiling workout buddy.</desc>
+<style>
+text{font-family:'Trebuchet MS',Arial,sans-serif;fill:#44254d}
+.buddy-body{fill:#f6c4e0;stroke:#57355f;stroke-width:3}
+.buddy-arm,.buddy-face{fill:none;stroke:#57355f;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.buddy-eye{fill:#57355f}.buddy-cheek{fill:#f18fbf}
+.buddy-shoe{fill:#ddd0fa;stroke:#57355f;stroke-width:3}
+.buddy-star{fill:#ffd9e9;stroke:#57355f;stroke-width:2}
+.buddy-headband{fill:#fffafd;stroke:#57355f;stroke-width:2.5}
+.buddy-zzz{display:none}
+</style>
+<rect width="1200" height="380" rx="30" fill="#fff4fb"/>
+<circle cx="1010" cy="190" r="155" fill="#eee2fc"/>
+<circle cx="795" cy="50" r="12" fill="#f6c4e0"/>
+<circle cx="1155" cy="330" r="10" fill="#c49aef"/>
+<path d="m755 299 5 12 13 1-10 9 3 13-12-7-12 7 3-13-10-9 14-1Z" fill="#f6c4e0" stroke="#57355f" stroke-width="2"/>
+<text x="64" y="69" font-size="21" font-weight="bold" letter-spacing="5">DAILY.</text>
+<text x="60" y="151" font-size="64" font-weight="bold">Small wins.</text>
+<text x="60" y="225" font-size="64" font-weight="bold" style="fill:#8c3975">Happy days.</text>
+<text x="64" y="286" font-size="23" style="fill:#705476">A cheerful 30-day workout challenge.</text>
+<g transform="translate(854 35) scale(1.48)">
+          <path class="buddy-star" d="m27 21 4 9 10 1-8 7 2 10-9-5-9 5 2-10-8-7 11-1Z"/>
+          <path class="buddy-star" d="m183 57 3 7 8 1-6 5 1 8-7-4-7 4 2-8-6-6 8-1Z"/>
+          <ellipse class="buddy-shoe" cx="79" cy="160" rx="18" ry="8" transform="rotate(-12 79 160)"/>
+          <ellipse class="buddy-shoe" cx="131" cy="160" rx="18" ry="8" transform="rotate(12 131 160)"/>
+          <path class="buddy-body" d="M58 74C54 28 151 20 155 71l8 54c7 41-119 41-115 3Z"/>
+          <path class="buddy-headband" d="M58 64q44-17 97 0l1 15q-50-15-100 1Z"/>
+          <path class="buddy-arm" d="M50 105q-24 6-26-12m134 12q24-3 26-24m-163 7 4 7 7-4m147-14 5 7 6-4"/>
+          <circle class="buddy-eye" cx="84" cy="100" r="4"/><circle class="buddy-eye" cx="126" cy="100" r="4"/>
+          <path class="buddy-face" d="M94 115q11 13 23 0"/>
+          <ellipse class="buddy-cheek" cx="72" cy="112" rx="7" ry="4"/><ellipse class="buddy-cheek" cx="138" cy="112" rx="7" ry="4"/>
+          <text class="buddy-zzz" x="161" y="40">z Z</text>
+        </g>
+<rect x="896" y="309" width="220" height="40" rx="17" fill="#ffd9e9" stroke="#57355f" stroke-width="2"/>
+<text x="1006" y="335" text-anchor="middle" font-size="17" font-weight="bold">One little win at a time.</text>
+</svg>
