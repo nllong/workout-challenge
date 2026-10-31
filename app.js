@@ -4,6 +4,7 @@
   const Joy = window.WorkoutJoy;
   const finaleParty = Joy.createCelebration(document.getElementById("confetti-canvas"));
   const $ = id => document.getElementById(id);
+  const timerAlerts = window.WorkoutAlerts.create(window, document);
   const el = (tag, cls, text) => {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -48,7 +49,7 @@
   function goLink(node, n, label) { node.href = internalUrl(n); node.dataset.day = String(n); if (label) node.textContent = label; }
   function formatDate(date, options) { return new Intl.DateTimeFormat("en-US", { timeZone: "UTC", ...options }).format(new Date(date + "T12:00:00Z")); }
   function formatTime(seconds) { return String(Math.floor(seconds / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0"); }
-  function disposeTimers() { timers.forEach(clearInterval); timers.clear(); }
+  function disposeTimers() { timers.forEach(clearInterval); timers.clear(); timerAlerts.dismiss(); }
   function makeTimer(e, kind, maxInput) {
     const box = el("div", "timer");
     const output = el("output", "timer-display", kind === "test" ? "00:00" : formatTime(e.amount));
@@ -66,12 +67,15 @@
         remaining = 0; running = false; clearInterval(interval); timers.delete(interval);
         start.textContent = "Start again"; announcement.textContent = e.name + " timer complete. Mark the exercise done when ready.";
         box.classList.add("finished");
+        timerAlerts.finished(e.name, internalUrl(selected));
       }
       return ms;
     }
     start.addEventListener("click", () => {
       if (running) {
-        remaining = paint(); running = false; clearInterval(interval); timers.delete(interval);
+        const ms = paint();
+        if (!running) return;
+        remaining = ms; running = false; clearInterval(interval); timers.delete(interval);
         start.textContent = kind === "test" ? "Resume max timer" : "Resume";
         if (kind === "test") {
           maxInput.value = String(Math.floor(remaining / 1000));
@@ -79,6 +83,7 @@
           announcement.textContent = "Max saved: " + maxInput.value + " seconds.";
         }
       } else {
+        if (kind !== "test") timerAlerts.unlockSound();
         if (kind !== "test" && remaining <= 0) remaining = e.amount * 1000;
         anchor = Date.now(); running = true; box.classList.remove("finished"); announcement.textContent = "";
         start.textContent = kind === "test" ? "Stop & log" : "Pause";

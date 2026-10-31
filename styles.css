@@ -228,3 +228,24 @@ select:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent);
 .finale-celebration p { font-size: .95rem; }
 .celebration-stars { display: block; font-size: 2rem; letter-spacing: .3em; margin-bottom: 10px; }
 .confetti-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 100; pointer-events: none; }
+
+/* Countdown completion popup and opt-in sound/notification controls. */
+.timer-settings { margin: 0 0 22px; border: 1px solid var(--border); border-radius: 13px; padding: 12px 15px; }
+.timer-settings summary { min-height: 28px; font-size: .85rem; font-weight: 800; color: var(--accent); }
+.timer-settings .done-label { font-size: .85rem; margin: 10px 0; }
+.timer-alert-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0 16px; }
+.timer-alert-buttons .button { font-size: .8rem; min-height: 44px; padding: 10px 12px; }
+.timer-alert-buttons .button:disabled { opacity: .65; cursor: default; transform: none; }
+#timer-alert-status { margin-top: 10px; color: var(--accent); }
+#timer-alert-status:empty { display: none; }
+.timer-finished-dialog { width: min(440px, calc(100% - 36px)); max-height: calc(100dvh - 40px); overflow: auto; padding: 28px; border: 3px solid #57355f; border-radius: 25px; background: var(--rose); color: var(--ink); box-shadow: 6px 6px 0 #57355f; }
+.timer-finished-dialog::backdrop { background: #24162e99; }
+.timer-finished-dialog .eyebrow { margin-bottom: 12px; }
+.timer-finished-dialog h2 { font-size: 2rem; margin-bottom: 17px; }
+.timer-finished-dialog ul { padding-left: 22px; margin: 0 0 16px; font-weight: 800; }
+.timer-finished-dialog li + li { margin-top: 8px; }
+.timer-finished-dialog > p:not(.eyebrow) { font-size: .9rem; margin-bottom: 22px; }
+.timer-finished-dialog .button { width: 100%; --line: #57355f; }
+
+.timer-finished-dialog:not([open]) { display: none; }
+.timer-finished-dialog.fallback-open { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; z-index: 200; }

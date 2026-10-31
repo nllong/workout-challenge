@@ -12,6 +12,7 @@
 <script defer src="core.js"></script>
 <script defer src="challenge.js"></script>
 <script defer src="joy.js"></script>
+<script defer src="timer-alerts.js"></script>
 <script defer src="app.js"></script>
 </head>
 <body>
@@ -54,6 +55,16 @@
           <h3 id="encouragement-title"></h3>
           <p id="encouragement-copy"></p>
         </aside>
+        <details class="timer-settings">
+          <summary>Timer sound &amp; alerts</summary>
+          <label class="done-label"><input id="timer-sound" type="checkbox" checked> Play a chime when timers finish</label>
+          <div class="timer-alert-buttons">
+            <button id="timer-test-sound" class="button secondary" type="button">Test chime</button>
+            <button id="timer-enable-notifications" class="button secondary" type="button">Enable browser alerts</button>
+          </div>
+          <p class="small muted">Keep this page open for timer alerts. Locked or sleeping phones may delay them.</p>
+          <p id="timer-alert-status" class="small" role="status"></p>
+        </details>
         <div id="exercises"></div>
         <div id="completed" class="completion" hidden role="status"></div>
         <div id="finale-celebration" class="finale-celebration" hidden>
@@ -120,6 +131,13 @@
     <footer><span>SMALL WINS DESERVE BIG HIGH FIVES.</span><span id="footer-month"></span></footer>
   </div>
 </main>
+<dialog id="timer-finished-dialog" class="timer-finished-dialog" aria-labelledby="timer-finished-title" aria-describedby="timer-finished-help">
+  <p class="eyebrow">TIME FOR A HIGH FIVE</p>
+  <h2 id="timer-finished-title">Timer done!</h2>
+  <ul id="timer-finished-list" aria-live="polite"></ul>
+  <p id="timer-finished-help">Nice work! Check off the exercise when you're ready.</p>
+  <button id="timer-dismiss" class="button" type="button" autofocus>Got it!</button>
+</dialog>
 <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true" hidden></canvas>
 <noscript><p class="panel">Enable JavaScript to view the challenge, run timers, and export reminders.</p></noscript>
 </body>

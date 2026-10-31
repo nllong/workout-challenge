@@ -6,7 +6,7 @@ A cheerful, phone-friendly 30-day workout challenge. Open today's workout, start
 
 ## What it does
 
-- Daily exercise targets with built-in countdown timers.
+- Daily targets and countdown timers with a completion popup and chime.
 - Lighter deload days, rest days, and encouragement as the challenge ramps up.
 - Checkmarks and a 30-day progress grid that highlights only completed days.
 - Calendar reminders at **7:30 PM America/Denver**, linking to each day's workout at [workouts.nicholaslong.org](https://workouts.nicholaslong.org/).
@@ -15,7 +15,7 @@ A cheerful, phone-friendly 30-day workout challenge. Open today's workout, start
 
 ![Illustration of a deload workout and the day-30 celebration](docs/images/challenge-preview.svg)
 
-Progress and workout check-ins are saved in the browser you use.
+Progress and workout check-ins are saved in the browser you use. Keep the page open for timer alerts; phone sleep can delay them. Optional browser alerts can be enabled under **Timer sound & alerts**.
 
 ## Run or update
 
