@@ -123,8 +123,8 @@ input[type=url], input[type=number] { width: 100%; border: 2px solid var(--borde
 #calendar-status:empty { display: none; }
 #validation-result { margin-top: 14px; }
 .plan-section { margin-top: 27px; border-top: 2px dashed var(--border); padding: 20px 0; }
-.plan-section > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 48px; font-size: 1.15rem; font-weight: 900; }
-.plan-section > p { margin: 16px 0; }
+.plan-preview-button { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 48px; font-size: 1.15rem; font-weight: 900; }
+#plan-reveal > p { margin: 16px 0; }
 .table-scroll { overflow: auto; max-height: 620px; border: 2px solid var(--line); border-radius: 15px; }
 table { border-collapse: collapse; width: 100%; font-size: .87rem; white-space: nowrap; text-align: left; }
 th, td { padding: 13px 16px; border-bottom: 1px solid var(--border); }
@@ -187,8 +187,8 @@ footer { display: flex; justify-content: space-between; gap: 15px; color: var(--
   .calendar-panel { grid-template-columns: 1fr; }
   .calendar-panel > .button { width: 100%; }
   .calendar-options { grid-column: 1; }
-  .plan-section > summary { font-size: 1rem; }
-  .plan-section > summary .small { font-size: .68rem; }
+  .plan-preview-button { font-size: 1rem; }
+  .plan-preview-button .small { font-size: .68rem; }
   footer { font-size: .56rem; letter-spacing: .03em; }
 }
 @media (prefers-color-scheme: dark) {
@@ -256,3 +256,18 @@ select:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent);
 .reset-link:hover { color: var(--text); }
 #reset-status { color: var(--muted); font-size: .75rem; margin: 8px 0 0; }
 #reset-status:empty { display: none; }
+
+/* Future days stay neutral and unavailable; completed days remain revisitable. */
+.grid-day:disabled { color: var(--text); opacity: 1; cursor: default; }
+#navigation-notice:empty { display: none; }
+.plan-preview-button { width: 100%; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--text); text-align: left; font-family: inherit; font-weight: 900; }
+.spoiler-dialog { width: min(510px, calc(100% - 36px)); max-height: calc(100dvh - 40px); overflow: auto; padding: 28px; border: 3px solid #57355f; border-radius: 25px; background: var(--panel); color: var(--text); box-shadow: 6px 6px 0 #57355f; }
+.spoiler-dialog::backdrop { background: #24162eaa; }
+.spoiler-dialog .eyebrow { color: var(--accent); margin-bottom: 12px; }
+.spoiler-dialog h2 { font-size: 1.8rem; margin-bottom: 15px; }
+.spoiler-dialog > p:not(.eyebrow) { font-size: .95rem; color: var(--muted); }
+.spoiler-wait { margin-top: 20px; padding: 18px; border: 2px solid var(--border); border-radius: 15px; text-align: center; background: var(--panel-2); }
+#spoiler-countdown { display: block; color: var(--accent); font: 800 2.5rem ui-monospace, monospace; margin: 8px 0; }
+.spoiler-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; }
+.spoiler-actions .button { flex: 1 1 180px; }
+.spoiler-actions .button:disabled { opacity: .55; cursor: default; transform: none; }

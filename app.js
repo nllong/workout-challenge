@@ -36,7 +36,9 @@
     const nowComplete = isComplete(n);
     if (nowComplete && !wasComplete) logs[n].completedAt = new Date().toISOString();
     if (!nowComplete) delete logs[n].completedAt;
-    write(storageKey, logs); renderProgress(); updateCompletion();
+    write(storageKey, logs);
+    if (!canViewDay(selected)) { renderDay(); return; }
+    renderProgress(); updateCompletion();
     if (n === 30 && nowComplete && !wasComplete) finaleParty.start();
   }
   function resetAllProgress() {
@@ -53,6 +55,59 @@
     if (d.kind === "rest") return log.rest === true;
     return d.exercises.every(e => log["done" + e.index] === true &&
       (d.kind !== "test" || (Number.isInteger(log["max" + e.index]) && log["max" + e.index] >= 0)));
+  }
+  function canViewDay(n) { return Number.isInteger(n) && n >= 1 && n <= 30 && (n === today.day || isComplete(n)); }
+  let previewDeadline = 0, previewInterval = null, previewGeneration = 0;
+  function cancelPreviewWait() {
+    if (previewInterval !== null) clearInterval(previewInterval);
+    previewInterval = null; previewDeadline = 0; previewGeneration++;
+    $("spoiler-confirm").disabled = false;
+    $("spoiler-wait").hidden = true;
+    if ($("plan-reveal").hidden) $("plan-preview-label").textContent = "See what's ahead +";
+  }
+  function closeSpoilerDialog() {
+    cancelPreviewWait();
+    const dialog = $("spoiler-dialog");
+    if (dialog.open) dialog.close();
+  }
+  function hidePlanPreview() {
+    closeSpoilerDialog();
+    $("plan-reveal").hidden = true;
+    $("plan-table").replaceChildren();
+    $("plan-explainer").textContent = "";
+    $("plan-preview").setAttribute("aria-expanded", "false");
+    $("plan-preview-label").textContent = "See what's ahead +";
+  }
+  function requestPlanPreview() {
+    if (!$("plan-reveal").hidden) { hidePlanPreview(); return; }
+    if (previewDeadline) { closeSpoilerDialog(); return; }
+    cancelPreviewWait();
+    const dialog = $("spoiler-dialog");
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else if (window.confirm("It's better to be surprised by what's next. Are you sure you want to see the full plan after a one-minute wait?")) beginPreviewWait();
+  }
+  function beginPreviewWait() {
+    if (previewDeadline) return;
+    previewDeadline = Date.now() + 60000;
+    const generation = ++previewGeneration;
+    $("spoiler-confirm").disabled = true;
+    $("spoiler-wait").hidden = false;
+    function tick() {
+      if (!previewDeadline || generation !== previewGeneration) return;
+      const remaining = Math.max(0, previewDeadline - Date.now());
+      $("spoiler-countdown").textContent = formatTime(Math.ceil(remaining / 1000));
+      $("plan-preview-label").textContent = "Cancel peek (" + formatTime(Math.ceil(remaining / 1000)) + ")";
+      if (remaining > 0) return;
+      closeSpoilerDialog();
+      renderPlan();
+      $("plan-reveal").hidden = false;
+      $("plan-preview").setAttribute("aria-expanded", "true");
+      $("plan-preview-label").textContent = "Hide the plan −";
+      $("plan-reveal").focus({ preventScroll: true });
+      $("plan-reveal").scrollIntoView({ behavior: "auto", block: "start" });
+    }
+    previewInterval = setInterval(tick, 250);
+    tick();
   }
   function internalUrl(n) { return C.dayUrl(location.href, config, n); }
   function goLink(node, n, label) { node.href = internalUrl(n); node.dataset.day = String(n); if (label) node.textContent = label; }
@@ -197,9 +252,15 @@
     $("completed").textContent = selected === 30 ? (d.kind === "finale" ? "★ Finale complete! Give yourself a big high five." : "★ Day 30 complete! Give yourself a big high five.") : d.kind === "deload" ? "★ Deload done! Lighter day, full gold star." : d.kind === "rest" ? "★ Recharge complete. Rest gets a gold star, too." : "★ Day complete! That deserves a happy dance.";
     const teaser = $("up-next"); teaser.replaceChildren(); teaser.hidden = !done;
     if (done && selected < 30) {
-      const nextDay = days[selected]; teaser.append(el("p", "eyebrow", "UP NEXT · DAY " + nextDay.day));
-      teaser.append(el("p", "", "Another day, another small win. Open the next day to see what's waiting for you."));
-      const link = el("a", "text-link", "Open day " + nextDay.day + " →"); goLink(link, nextDay.day); teaser.append(link);
+      const nextDay = days[selected];
+      teaser.append(el("p", "eyebrow", "ONE DAY AT A TIME"));
+      if (canViewDay(nextDay.day)) {
+        teaser.append(el("p", "", "This day is already unlocked."));
+        const link = el("a", "text-link", "Open day " + nextDay.day + " →");
+        goLink(link, nextDay.day); teaser.append(link);
+      } else {
+        teaser.append(el("p", "", "Your next day unlocks on " + formatDate(nextDay.date, { month: "long", day: "numeric" }) + ". Keep it a surprise!"));
+      }
     } else if (done) {
       teaser.append(el("p", "", "Days completed: " + days.filter(x => isComplete(x.day)).length + " of 30. You can revisit any day in the progress grid."));
     }
@@ -214,16 +275,25 @@
     $("progress-bar").value = completed;
     const grid = $("progress-grid"); grid.replaceChildren();
     days.forEach(d => {
-      const done = isComplete(d.day), link = el("a", "grid-day" + (done ? " complete" : "") + (d.day === selected ? " selected" : ""), String(d.day).padStart(2, "0"));
-      goLink(link, d.day);
-      link.setAttribute("aria-label", "Day " + d.day + (done ? ", complete" : ", not complete") + (d.day === today.day && today.raw >= 1 && today.raw <= 30 ? ", today" : ""));
-      if (d.day === selected) link.setAttribute("aria-current", "page");
-      grid.append(link);
+      const done = isComplete(d.day), allowed = canViewDay(d.day);
+      const cell = el(allowed ? "a" : "button", "grid-day" + (done ? " complete" : "") + (d.day === selected ? " selected" : ""), String(d.day).padStart(2, "0"));
+      if (allowed) goLink(cell, d.day);
+      else { cell.type = "button"; cell.disabled = true; }
+      cell.setAttribute("aria-label", "Day " + d.day + (done ? ", complete" : allowed ? ", available" : ", locked") +
+        (d.day === today.day && today.raw >= 1 && today.raw <= 30 ? ", today" : ""));
+      if (d.day === selected) cell.setAttribute("aria-current", "page");
+      grid.append(cell);
     });
     $("storage-warning").hidden = !storageFailed;
   }
   function renderDay() {
-    disposeTimers(); finaleParty.stop();
+    disposeTimers(); finaleParty.stop(); hidePlanPreview();
+    $("navigation-notice").textContent = "";
+    if (!canViewDay(selected)) {
+      selected = today.day;
+      history.replaceState({}, "", internalUrl(selected));
+      $("navigation-notice").textContent = "That day is locked. Open today's workout or revisit a completed day.";
+    }
     const d = days[selected - 1]; renderMood(d); document.title = "Day " + selected + " / " + config.title;
     $("day-title").textContent = "Day " + String(selected).padStart(2, "0") + ".";
     $("day-date").textContent = formatDate(d.date, { weekday: "long", month: "long", day: "numeric" });
@@ -231,8 +301,12 @@
     $("day-instruction").textContent = d.kind === "test" ? "Log your max for each exercise, then check Done. A max of 0 is valid." :
       d.kind === "rest" ? "Today's mission: recharge. Check off your rest day when you're ready." : d.kind === "deload" ? "These are your lighter targets. A deload day counts just as much!" : d.kind === "finale" ? "Your final targets are here. One exercise at a time. You've got this!" : "One little win at a time. Check each exercise off as you go.";
     $("today-link").hidden = selected === today.day; goLink($("today-link"), today.day, today.raw < 1 ? "Back to day one ↗" : today.raw > 30 ? "Back to last day ↗" : "Back to today ↗");
-    $("previous").hidden = selected === 1; if (selected > 1) goLink($("previous"), selected - 1, "← Previous day");
-    $("next").hidden = selected === 30; if (selected < 30) goLink($("next"), selected + 1, "Next day →");
+    const previousDay = days.filter(item => item.day < selected && isComplete(item.day)).pop();
+    $("previous").hidden = !previousDay;
+    if (previousDay) goLink($("previous"), previousDay.day, "← Completed day " + previousDay.day);
+    const nextDay = days.find(item => item.day > selected && canViewDay(item.day));
+    $("next").hidden = !nextDay;
+    if (nextDay) goLink($("next"), nextDay.day, nextDay.day === today.day ? "Today →" : "Completed day " + nextDay.day + " →");
     renderExercises(d); renderProgress(); restoreTrackerCheckIn(); updateCompletion();
   }
   function renderPlan() {
@@ -241,7 +315,9 @@
     head.append(row); const body = document.createElement("tbody");
     days.forEach(d => {
       const tr = el("tr", d.kind), th = el("th"); th.scope = "row";
-      const link = el("a", "", String(d.day).padStart(2, "0")); goLink(link, d.day); th.append(link); tr.append(th);
+      if (canViewDay(d.day)) { const link = el("a", "", String(d.day).padStart(2, "0")); goLink(link, d.day); th.append(link); }
+      else th.textContent = String(d.day).padStart(2, "0");
+      tr.append(th);
       tr.append(el("td", "", formatDate(d.date, { month: "short", day: "numeric" })), el("td", "session " + d.kind, sessionLabel(d)));
       config.exercises.forEach((_, i) => tr.append(el("td", "", d.kind === "rest" ? "—" : d.kind === "test" ? "Max" : d.exercises[i].type === "timed" ? C.duration(d.exercises[i].amount) : String(d.exercises[i].amount))));
       body.append(tr);
@@ -278,7 +354,7 @@
     if (d.kind === "finale") $("mode-copy").textContent = d.exercises.map(displayTarget).join(" · ") + ". Fixed targets, not a max test.";
   }
   function refreshDate() {
-    today = C.currentDay(config); lastLocalDate = today.today;
+    today = C.currentDay(config, Date.now()); lastLocalDate = today.today;
     const notice = $("date-notice");
     notice.hidden = today.raw >= 1 && today.raw <= 30;
     notice.textContent = today.raw < 1 ? "This challenge starts " + formatDate(config.startDate, { month: "long", day: "numeric", year: "numeric" }) + ". You can preview the plan below." :
@@ -312,7 +388,11 @@
     $("footer-month").textContent = formatDate(config.startDate, { month: "long", year: "numeric" }) + " / 30 DAYS";
     const [hours, minutes] = config.reminderTime.split(":").map(Number);
     $("calendar-copy").textContent = "Daily reminder for 30 days. " + (hours % 12 || 12) + ":" + String(minutes).padStart(2, "0") + (hours < 12 ? " AM" : " PM") + " · " + config.timeZone + ". Open the site to see today's challenge.";
-    renderPlan(); renderDay();
+    renderDay();
+    $("plan-preview").addEventListener("click", requestPlanPreview);
+    $("spoiler-confirm").addEventListener("click", beginPreviewWait);
+    $("spoiler-cancel").addEventListener("click", closeSpoilerDialog);
+    $("spoiler-dialog").addEventListener("close", cancelPreviewWait);
     $("tracker-modified").addEventListener("change", saveTrackerCheckIn);
     $("tracker-modifications").addEventListener("input", saveTrackerCheckIn);
     $("tracker-rpe").addEventListener("change", saveTrackerCheckIn);
@@ -332,7 +412,7 @@
     });
     // A home page left open overnight follows the new day; explicit day links stay put.
     setInterval(() => {
-      if (C.localDate(config.timeZone) === lastLocalDate) return;
+      if (C.localDate(config.timeZone, Date.now()) === lastLocalDate) return;
       refreshDate();
       if (!new URLSearchParams(location.search).has("day")) selected = today.day;
       renderDay();
@@ -341,7 +421,7 @@
       if (event.key !== storageKey && event.key !== null) return;
       const latest = read(storageKey); logs = latest && typeof latest === "object" && !Array.isArray(latest) ? latest : {}; renderDay();
     });
-    window.addEventListener("pagehide", () => { disposeTimers(); finaleParty.stop(); });
+    window.addEventListener("pagehide", () => { disposeTimers(); finaleParty.stop(); hidePlanPreview(); });
     window.addEventListener("pageshow", event => { if (event.persisted) { refreshDate(); renderDay(); } });
   } catch (err) {
     $("challenge").hidden = true; const box = $("fatal"); box.hidden = false;

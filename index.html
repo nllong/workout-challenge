@@ -111,6 +111,8 @@
         <progress id="progress-bar" max="30" value="0" aria-label="Completed days"></progress>
         <div id="progress-grid" class="progress-grid" aria-label="30-day progress"></div>
         <div class="legend"><span><i class="legend-done"></i> Completed</span></div>
+        <p class="small muted">Open today or revisit completed days. The rest unlock one day at a time.</p>
+        <p id="navigation-notice" class="small muted" role="status"></p>
         <p class="small muted">Checkmarks and max logs stay in this browser. Day links carry the full challenge, so the workout opens on any device.</p>
         <p id="storage-warning" class="notice small" hidden role="status">Browser storage is unavailable. You can still use the workout; progress will last only until this page closes.</p>
       </aside>
@@ -125,9 +127,15 @@
       </details>
       <p id="calendar-status" class="small" role="status"></p>
     </section>
-    <details class="plan-section" id="full-plan"><summary><span>The full 30-day plan</span><span class="muted small">See what's ahead +</span></summary>
-      <p id="plan-explainer" class="small muted"></p><div class="table-scroll" tabindex="0" role="region" aria-label="Full workout plan"><table id="plan-table"></table></div>
-    </details>
+    <section class="plan-section" id="full-plan">
+      <button id="plan-preview" class="plan-preview-button" type="button" aria-expanded="false" aria-controls="plan-reveal">
+        <span>The full 30-day plan</span><span id="plan-preview-label" class="muted small">See what's ahead +</span>
+      </button>
+      <div id="plan-reveal" tabindex="-1" role="region" aria-label="Full 30-day plan" hidden>
+        <p id="plan-explainer" class="small muted"></p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Full workout plan"><table id="plan-table"></table></div>
+      </div>
+    </section>
     <footer><span>SMALL WINS DESERVE BIG HIGH FIVES.</span><span id="footer-month"></span></footer>
     <div class="footer-tools">
       <button id="reset-all" class="reset-link" type="button">Reset all progress</button>
@@ -135,6 +143,19 @@
     </div>
   </div>
 </main>
+<dialog id="spoiler-dialog" class="spoiler-dialog" aria-labelledby="spoiler-title" aria-describedby="spoiler-copy">
+  <p class="eyebrow">A LITTLE MYSTERY IS PART OF THE FUN</p>
+  <h2 id="spoiler-title">Keep a little surprise?</h2>
+  <p id="spoiler-copy">It's better to be surprised by what's next. If you're really sure you want to look ahead, confirm below and wait a full minute before the plan opens.</p>
+  <div id="spoiler-wait" class="spoiler-wait" hidden>
+    <p>Your peek opens in</p><output id="spoiler-countdown" aria-label="Time until the plan opens">01:00</output>
+    <p class="small">You can still choose to keep it a surprise.</p>
+  </div>
+  <div class="spoiler-actions">
+    <button id="spoiler-cancel" class="button" type="button" autofocus>Keep it a surprise</button>
+    <button id="spoiler-confirm" class="button secondary" type="button">I'm sure — wait 1 minute</button>
+  </div>
+</dialog>
 <dialog id="timer-finished-dialog" class="timer-finished-dialog" aria-labelledby="timer-finished-title" aria-describedby="timer-finished-help">
   <p class="eyebrow">TIME FOR A HIGH FIVE</p>
   <h2 id="timer-finished-title">Timer done!</h2>
