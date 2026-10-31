@@ -207,12 +207,13 @@ footer { display: flex; justify-content: space-between; gap: 15px; color: var(--
 .tracker-checkin { background: var(--panel-2); border: 2px solid var(--border); border-radius: 17px; padding: 20px; margin-top: 20px; }
 .tracker-checkin > .eyebrow { color: var(--accent); margin-bottom: 10px; }
 .tracker-checkin h3 { font-size: 1.35rem; margin-bottom: 9px; }
-.tracker-checkin label { display: block; font-size: .9rem; font-weight: 800; margin: 18px 0 7px; }
-.tracker-checkin select, .tracker-checkin textarea { width: 100%; min-height: 48px; border: 2px solid var(--border); background: var(--panel); color: var(--text); padding: 12px; border-radius: 11px; font: inherit; font-size: 1rem; }
+.tracker-checkin label { display: block; font-size: 1rem; font-weight: 800; margin: 24px 0 12px; }
+.tracker-checkin select, .tracker-checkin textarea { width: 100%; min-height: 68px; border: 2px solid var(--border); background: var(--panel); color: var(--text); padding: 18px 16px; border-radius: 14px; font: inherit; font-size: 1.125rem; }
+.tracker-checkin select { -webkit-appearance: none; appearance: none; height: auto; padding-right: 48px; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 24px) center, calc(100% - 16px) center; background-size: 8px 8px; background-repeat: no-repeat; }
 .tracker-checkin textarea { display: block; resize: vertical; line-height: 1.55; }
-#tracker-note { font-family: ui-monospace, monospace; font-size: .85rem; }
+#tracker-note { font-family: ui-monospace, monospace; font-size: 1rem; }
 #tracker-hint { margin-top: 12px; color: var(--muted); }
-#tracker-copy { margin-top: 18px; width: 100%; }
+#tracker-copy { margin-top: 24px; width: 100%; min-height: 80px; padding: 22px 24px; border-radius: 18px; font-size: 1.2rem; }
 #tracker-copy:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 #tracker-copy-status { margin-top: 12px; color: var(--accent); }
 #tracker-copy-status:empty { display: none; }
