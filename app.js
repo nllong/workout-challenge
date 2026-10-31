@@ -40,6 +40,8 @@
     const nowComplete = isComplete(n);
     if (nowComplete && !wasComplete) logs[n].completedAt = new Date().toISOString();
     if (!nowComplete) delete logs[n].completedAt;
+    // Undoing completion must not revoke access to the day being edited.
+    if (wasComplete && !nowComplete && n === selected) logs[n].resumeHere = true;
     write(storageKey, logs);
     if (!canViewDay(selected)) { renderDay(); return; }
     renderProgress(); updateCompletion();
