@@ -249,3 +249,10 @@ select:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent);
 
 .timer-finished-dialog:not([open]) { display: none; }
 .timer-finished-dialog.fallback-open { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0; z-index: 200; }
+
+/* Quiet maintenance control at the very bottom. */
+.footer-tools { text-align: center; margin: -10px 0 24px; }
+.reset-link { min-height: 44px; padding: 10px 12px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font-size: .75rem; text-decoration: underline; text-underline-offset: 4px; }
+.reset-link:hover { color: var(--text); }
+#reset-status { color: var(--muted); font-size: .75rem; margin: 8px 0 0; }
+#reset-status:empty { display: none; }

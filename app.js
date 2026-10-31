@@ -39,6 +39,15 @@
     write(storageKey, logs); renderProgress(); updateCompletion();
     if (n === 30 && nowComplete && !wasComplete) finaleParty.start();
   }
+  function resetAllProgress() {
+    if (!window.confirm("Reset all 30 days of " + config.title + " in this browser? This clears checkmarks, max logs, modifications, and RPE entries, and stops running timers. This cannot be undone.")) return;
+    logs = {};
+    write(storageKey, logs);
+    renderDay();
+    $("reset-status").textContent = storageFailed
+      ? "Progress reset for this session. Browser storage is unavailable."
+      : "All progress for this challenge has been reset.";
+  }
   function isComplete(n) {
     const d = days[n - 1], log = dayLog(n);
     if (d.kind === "rest") return log.rest === true;
@@ -308,6 +317,7 @@
     $("tracker-modifications").addEventListener("input", saveTrackerCheckIn);
     $("tracker-rpe").addEventListener("change", saveTrackerCheckIn);
     $("tracker-copy").addEventListener("click", copyTrackerNote);
+    $("reset-all").addEventListener("click", resetAllProgress);
     $("export").addEventListener("click", () => calendar(false));
     $("validate").addEventListener("click", () => calendar(true));
     document.addEventListener("click", event => {
