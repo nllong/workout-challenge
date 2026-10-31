@@ -184,8 +184,8 @@
     const teaser = $("up-next"); teaser.replaceChildren(); teaser.hidden = !done;
     if (done && selected < 30) {
       const nextDay = days[selected]; teaser.append(el("p", "eyebrow", "UP NEXT · DAY " + nextDay.day));
-      teaser.append(el("p", "", nextDay.kind === "rest" ? "A well-earned rest day. Feet up!" : nextDay.kind === "test" ? "Max test. See how far you've come." : (nextDay.kind === "deload" ? "Deload day! " : nextDay.kind === "finale" ? "The big finish! " : "") + nextDay.exercises.map(displayTarget).join(" · ")));
-      const link = el("a", "text-link", "See tomorrow's workout →"); goLink(link, nextDay.day); teaser.append(link);
+      teaser.append(el("p", "", "Another day, another small win. Open the next day to see what's waiting for you."));
+      const link = el("a", "text-link", "Open day " + nextDay.day + " →"); goLink(link, nextDay.day); teaser.append(link);
     } else if (done) {
       teaser.append(el("p", "", "Days completed: " + days.filter(x => isComplete(x.day)).length + " of 30. You can revisit any day in the progress grid."));
     }
@@ -200,9 +200,9 @@
     $("progress-bar").value = completed;
     const grid = $("progress-grid"); grid.replaceChildren();
     days.forEach(d => {
-      const done = isComplete(d.day), link = el("a", "grid-day " + d.kind + (done ? " complete" : "") + (d.day === selected ? " selected" : ""), String(d.day).padStart(2, "0"));
+      const done = isComplete(d.day), link = el("a", "grid-day" + (done ? " complete" : "") + (d.day === selected ? " selected" : ""), String(d.day).padStart(2, "0"));
       goLink(link, d.day);
-      link.setAttribute("aria-label", "Day " + d.day + ", " + d.kind + (done ? ", complete" : "") + (d.day === today.day && today.raw >= 1 && today.raw <= 30 ? ", today" : ""));
+      link.setAttribute("aria-label", "Day " + d.day + (done ? ", complete" : ", not complete") + (d.day === today.day && today.raw >= 1 && today.raw <= 30 ? ", today" : ""));
       if (d.day === selected) link.setAttribute("aria-current", "page");
       grid.append(link);
     });
@@ -298,7 +298,6 @@
     $("footer-month").textContent = formatDate(config.startDate, { month: "long", year: "numeric" }) + " / 30 DAYS";
     const [hours, minutes] = config.reminderTime.split(":").map(Number);
     $("calendar-copy").textContent = "30 daily reminders. " + (hours % 12 || 12) + ":" + String(minutes).padStart(2, "0") + (hours < 12 ? " AM" : " PM") + " · " + config.timeZone + ". Each opens that day's workout.";
-    $("test-legend").hidden = !days.some(d => d.kind === "test");
     renderPlan(); renderDay();
     $("tracker-modified").addEventListener("change", saveTrackerCheckIn);
     $("tracker-modifications").addEventListener("input", saveTrackerCheckIn);

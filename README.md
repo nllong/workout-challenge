@@ -8,7 +8,7 @@ A cheerful, phone-friendly 30-day workout challenge. Open today's workout, start
 
 - Daily exercise targets with built-in countdown timers.
 - Lighter deload days, rest days, and encouragement as the challenge ramps up.
-- Checkmarks and a 30-day progress grid.
+- Checkmarks and a 30-day progress grid that highlights only completed days.
 - Calendar reminders at **7:30 PM America/Denver**, linking to each day's workout at [workouts.nicholaslong.org](https://workouts.nicholaslong.org/).
 - A copyable workout recap with modifications and overall RPE.
 - A big confetti celebration when you finish day 30.
