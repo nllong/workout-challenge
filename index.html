@@ -8,12 +8,12 @@
 <meta name="description" content="A cheerful monthly workout challenge with lighter deload days, timers, progress, and calendar reminders.">
 <title>Daily / Workout challenge</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css?v=20261031-6">
-<script defer src="core.js?v=20261031-6"></script>
-<script defer src="challenge.js?v=20261031-6"></script>
-<script defer src="joy.js?v=20261031-6"></script>
-<script defer src="timer-alerts.js?v=20261031-6"></script>
-<script defer src="app.js?v=20261031-6"></script>
+<link rel="stylesheet" href="styles.css?v=20261031-7">
+<script defer src="core.js?v=20261031-7"></script>
+<script defer src="challenge.js?v=20261031-7"></script>
+<script defer src="joy.js?v=20261031-7"></script>
+<script defer src="timer-alerts.js?v=20261031-7"></script>
+<script defer src="app.js?v=20261031-7"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to workout</a>
@@ -50,7 +50,7 @@
       <div class="legend"><span><i class="legend-done"></i> Completed</span></div>
       <p class="small muted">Open today or revisit completed days. The rest unlock one day at a time.</p>
       <p id="navigation-notice" class="small muted" role="status"></p>
-      <p class="small muted">Checkmarks and max logs stay in this browser. Day links carry the full challenge, so the workout opens on any device.</p>
+      <p class="small muted">Come back on the same device and in the same browser every time to keep your progress. No login is needed. Progress does not sync across devices or browsers; clearing browser data can erase it.</p>
       <p id="storage-warning" class="notice small" hidden role="status">Browser storage is unavailable. You can still use the workout; progress will last only until this page closes.</p>
     </section>
     <p id="date-notice" class="notice" hidden></p>
@@ -137,11 +137,24 @@
     </section>
     <footer><span>SMALL WINS DESERVE BIG HIGH FIVES.</span><span id="footer-month"></span></footer>
     <div class="footer-tools">
+      <button id="jump-open" class="reset-link" type="button">Lost your spot? Jump to day…</button>
+      <p id="jump-status" class="small muted" role="status"></p>
       <button id="reset-all" class="reset-link" type="button">Reset all progress</button>
       <p id="reset-status" role="status"></p>
     </div>
   </div>
 </main>
+<dialog id="jump-dialog" class="spoiler-dialog" aria-labelledby="jump-title" aria-describedby="jump-help">
+  <h2 id="jump-title">Pick up where you left off</h2>
+  <p id="jump-help">Choose the day you want to resume. Earlier days will be marked done. Existing notes and later progress will be kept.</p>
+  <label for="jump-day">Resume on day</label>
+  <select id="jump-day" autofocus></select>
+  <p id="jump-summary" class="small muted" role="status"></p>
+  <div class="spoiler-actions">
+    <button id="jump-confirm" class="button" type="button">Restore progress &amp; jump</button>
+    <button id="jump-cancel" class="button secondary" type="button">Cancel</button>
+  </div>
+</dialog>
 <dialog id="spoiler-dialog" class="spoiler-dialog" aria-labelledby="spoiler-title" aria-describedby="spoiler-copy">
   <p class="eyebrow">A LITTLE MYSTERY IS PART OF THE FUN</p>
   <h2 id="spoiler-title">Keep a little surprise?</h2>

@@ -48,22 +48,59 @@
   function resetAllProgress() {
     if (!window.confirm("Reset all 30 days of " + config.title + " in this browser? This clears checkmarks, max logs, modifications, and RPE entries, and stops running timers. This cannot be undone.")) return;
     logs = {}; previewedDays.clear();
+    $("jump-status").textContent = ""; closeJumpDialog();
     write(storageKey, logs);
     renderDay();
     $("reset-status").textContent = storageFailed
       ? "Progress reset for this session. Browser storage is unavailable."
       : "All progress for this challenge has been reset.";
   }
+  function jumpSummary() {
+    const n = Number($("jump-day").value);
+    $("jump-summary").textContent = n === 1 ? "Open day 1. No days will be marked done." :
+      "Mark " + (n === 2 ? "day 1" : "days 1–" + (n - 1)) + " done, then open day " + n + ".";
+  }
+  function closeJumpDialog() {
+    const dialog = $("jump-dialog");
+    if (dialog.open) dialog.close();
+  }
+  function openJumpDialog() {
+    $("jump-day").value = String(selected);
+    jumpSummary();
+    $("jump-dialog").showModal();
+  }
+  function restoreSpot() {
+    const n = Number($("jump-day").value);
+    if (!Number.isInteger(n) || n < 1 || n > 30) return;
+    closeJumpDialog();
+    // Restore checkmarks only: never invent RPE, max results, or completion dates.
+    days.forEach(d => {
+      if (dayLog(d.day).resumeHere) {
+        logs[d.day] = { ...dayLog(d.day) }; delete logs[d.day].resumeHere;
+      }
+      if (d.day >= n || isComplete(d.day)) return;
+      const log = { ...dayLog(d.day), recoveredComplete: true };
+      if (d.kind === "rest") log.rest = true;
+      else d.exercises.forEach(e => { log["done" + e.index] = true; });
+      logs[d.day] = log;
+    });
+    logs[n] = { ...dayLog(n), resumeHere: true };
+    write(storageKey, logs);
+    selected = n; history.pushState({}, "", internalUrl(n)); renderDay();
+    $("jump-status").textContent = "Your spot is restored at day " + n + ".";
+    $("day-title").tabIndex = -1; $("day-title").focus({ preventScroll: true });
+    $("day-title").scrollIntoView({ behavior: "auto", block: "start" });
+  }
   function isComplete(n) {
     const d = days[n - 1], log = dayLog(n);
     if (d.kind === "rest") return log.rest === true;
     return d.exercises.every(e => log["done" + e.index] === true &&
-      (d.kind !== "test" || (Number.isInteger(log["max" + e.index]) && log["max" + e.index] >= 0)));
+      (d.kind !== "test" || (log.recoveredComplete === true || (Number.isInteger(log["max" + e.index]) && log["max" + e.index] >= 0))));
   }
   const previewedDays = new Set();
   let pendingPreview = null;
   function isUnlockedDay(n) {
-    return Number.isInteger(n) && n >= 1 && n <= 30 && (n === today.day || isComplete(n));
+    return Number.isInteger(n) && n >= 1 && n <= 30 && (n === today.day || isComplete(n) || dayLog(n).resumeHere === true);
   }
   function canViewDay(n) { return isUnlockedDay(n) || previewedDays.has(n); }
   function closeSpoilerDialog() {
@@ -430,6 +467,13 @@
     $("tracker-rpe").addEventListener("change", saveTrackerCheckIn);
     $("tracker-copy").addEventListener("click", copyTrackerNote);
     $("reset-all").addEventListener("click", resetAllProgress);
+    days.forEach(d => {
+      const option = el("option", "", "Day " + d.day); option.value = String(d.day); $("jump-day").append(option);
+    });
+    $("jump-open").addEventListener("click", openJumpDialog);
+    $("jump-day").addEventListener("change", jumpSummary);
+    $("jump-confirm").addEventListener("click", restoreSpot);
+    $("jump-cancel").addEventListener("click", closeJumpDialog);
     $("export").addEventListener("click", () => calendar(false));
     $("validate").addEventListener("click", () => calendar(true));
     document.addEventListener("click", event => {

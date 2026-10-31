@@ -265,3 +265,8 @@ select:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent);
 .spoiler-dialog > p:not(.eyebrow) { font-size: .95rem; color: var(--muted); }
 .spoiler-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; }
 .spoiler-actions .button { flex: 1 1 180px; }
+
+#jump-status:empty { display: none; }
+#jump-dialog label { display: block; font-weight: 800; margin: 20px 0 8px; }
+#jump-day { width: 100%; min-height: 60px; padding: 12px; border: 2px solid var(--border); border-radius: 12px; background: var(--panel); color: var(--text); font: inherit; font-size: 1.125rem; }
+#jump-summary { margin-top: 14px; }
