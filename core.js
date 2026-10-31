@@ -5,6 +5,7 @@
   else root.WorkoutCore = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
+  const CALENDAR_SITE_URL = "https://workouts.nicholaslong.org/";
   const encoder = new TextEncoder();
   const fail = message => { throw new Error(message); };
   const pad = n => String(n).padStart(2, "0");
@@ -185,7 +186,7 @@
     return lines.join("\r\n");
   }
   function stamp(ms) { return new Date(ms).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, ""); }
-  function makeICS(c, base, now = Date.now()) {
+  function makeICS(c, base = CALENDAR_SITE_URL, now = Date.now()) {
     validate(c); base = cleanBase(base);
     const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Daily Workout//30 Day Challenge//EN", "CALSCALE:GREGORIAN"];
     for (const d of plan(c)) {
@@ -234,6 +235,6 @@
     return { count: events.length, maxOctets: Math.max(...physical.map(l => encoder.encode(l).length)),
       sample: "BEGIN:VEVENT\r\n" + events[0] + "END:VEVENT", unfolded };
   }
-  return { trackerNote, validate, duration, dateAt, encodeConfig, decodeConfig, plan, target, summary, cleanBase, dayUrl, wallToUtc, localDate, currentDay,
+  return { CALENDAR_SITE_URL, trackerNote, validate, duration, dateAt, encodeConfig, decodeConfig, plan, target, summary, cleanBase, dayUrl, wallToUtc, localDate, currentDay,
     icsText, foldLine, makeICS, inspectICS };
 });

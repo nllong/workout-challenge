@@ -273,9 +273,7 @@
   function calendar(previewOnly) {
     const status = $("calendar-status");
     try {
-      const base = C.cleanBase($("site-url").value);
-      if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(new URL(base).hostname)) throw new Error("Use the published website address so calendar links work on your phone.");
-      const ics = C.makeICS(config, base), report = C.inspectICS(ics);
+      const ics = C.makeICS(config), report = C.inspectICS(ics);
       $("validation-result").textContent = "Passed: " + report.count + " events · 15 minutes each · start-time alerts · CRLF · UTF-8 lines ≤ " + report.maxOctets + " octets · complete plan links.";
       $("sample-event").textContent = report.sample; $("sample-event").hidden = false;
       if (previewOnly) { status.textContent = "Calendar validated. The sample below is unfolded for readability."; return; }
@@ -300,7 +298,6 @@
     $("footer-month").textContent = formatDate(config.startDate, { month: "long", year: "numeric" }) + " / 30 DAYS";
     const [hours, minutes] = config.reminderTime.split(":").map(Number);
     $("calendar-copy").textContent = "30 daily reminders. " + (hours % 12 || 12) + ":" + String(minutes).padStart(2, "0") + (hours < 12 ? " AM" : " PM") + " · " + config.timeZone + ". Each opens that day's workout.";
-    $("site-url").value = location.protocol === "https:" && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? location.origin + location.pathname : "https://nllong.github.io/workout-challenge/";
     $("test-legend").hidden = !days.some(d => d.kind === "test");
     renderPlan(); renderDay();
     $("tracker-modified").addEventListener("change", saveTrackerCheckIn);
