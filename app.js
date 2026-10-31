@@ -114,15 +114,32 @@
     output.setAttribute("aria-label", e.name + (kind === "test" ? " elapsed time" : " time remaining"));
     // Announce completion only, avoiding a screen-reader announcement every second.
     const announcement = el("span", "sr-only"); announcement.setAttribute("role", "status");
-    const start = el("button", "button timer-button", kind === "test" ? "Start max timer" : "Start timer"); start.type = "button";
+    const initialLabel = kind === "test" ? "Go · max timer" : "Go · 3s prep";
+    const start = el("button", "button timer-button", initialLabel); start.type = "button";
     const reset = el("button", "button secondary", "Reset"); reset.type = "button";
-    let running = false, remaining = kind === "test" ? 0 : e.amount * 1000, anchor = 0, interval;
+    let running = false, preparing = false, remaining = kind === "test" ? 0 : e.amount * 1000, anchor = 0, interval;
+    function stopInterval() {
+      clearInterval(interval); timers.delete(interval); timerAlerts.setActiveTimers(timers.size);
+    }
     function paint() {
+      if (preparing) {
+        const seconds = Math.ceil(Math.max(0, anchor - Date.now()) / 1000);
+        if (seconds > 0) {
+          output.textContent = String(seconds);
+          announcement.textContent = "Get ready: " + seconds;
+          return remaining;
+        }
+        preparing = false; running = true; anchor = Date.now();
+        box.classList.remove("preparing");
+        start.textContent = kind === "test" ? "Stop & log" : "Pause";
+        announcement.textContent = "Go!";
+        timerAlerts.startBuzzer();
+      }
       const ms = running ? (kind === "test" ? remaining + Date.now() - anchor : Math.max(0, remaining - (Date.now() - anchor))) : remaining;
       const seconds = kind === "test" ? Math.floor(ms / 1000) : Math.ceil(ms / 1000);
       output.textContent = formatTime(seconds);
       if (running && kind !== "test" && ms <= 0) {
-        remaining = 0; running = false; clearInterval(interval); timers.delete(interval); timerAlerts.setActiveTimers(timers.size);
+        remaining = 0; running = false; stopInterval();
         start.textContent = "Start again"; announcement.textContent = e.name + " timer complete. Mark the exercise done when ready.";
         box.classList.add("finished");
         timerAlerts.finished(e.name, internalUrl(selected));
@@ -130,10 +147,13 @@
       return ms;
     }
     start.addEventListener("click", () => {
-      if (running) {
+      if (preparing) {
+        preparing = false; stopInterval(); box.classList.remove("preparing");
+        start.textContent = initialLabel; announcement.textContent = "Countdown cancelled."; paint();
+      } else if (running) {
         const ms = paint();
         if (!running) return;
-        remaining = ms; running = false; clearInterval(interval); timers.delete(interval); timerAlerts.setActiveTimers(timers.size);
+        remaining = ms; running = false; stopInterval();
         start.textContent = kind === "test" ? "Resume max timer" : "Resume";
         if (kind === "test") {
           maxInput.value = String(Math.floor(remaining / 1000));
@@ -141,16 +161,19 @@
           announcement.textContent = "Max saved: " + maxInput.value + " seconds.";
         }
       } else {
-        if (kind !== "test") timerAlerts.unlockSound();
+        timerAlerts.unlockSound();
+        const resuming = start.textContent === "Resume" || start.textContent === "Resume max timer";
         if (kind !== "test" && remaining <= 0) remaining = e.amount * 1000;
-        anchor = Date.now(); running = true; box.classList.remove("finished"); announcement.textContent = "";
-        start.textContent = kind === "test" ? "Stop & log" : "Pause";
-        interval = setInterval(paint, 200); timers.add(interval); timerAlerts.setActiveTimers(timers.size); paint();
+        preparing = !resuming; running = resuming;
+        anchor = Date.now() + (preparing ? 3000 : 0);
+        box.classList.remove("finished"); box.classList.toggle("preparing", preparing); announcement.textContent = "";
+        start.textContent = preparing ? "Cancel countdown" : kind === "test" ? "Stop & log" : "Pause";
+        interval = setInterval(paint, 100); timers.add(interval); timerAlerts.setActiveTimers(timers.size); paint();
       }
     });
     reset.addEventListener("click", () => {
-      clearInterval(interval); timers.delete(interval); timerAlerts.setActiveTimers(timers.size); running = false; remaining = kind === "test" ? 0 : e.amount * 1000;
-      start.textContent = kind === "test" ? "Start max timer" : "Start timer"; box.classList.remove("finished"); announcement.textContent = ""; paint();
+      stopInterval(); running = false; preparing = false; remaining = kind === "test" ? 0 : e.amount * 1000;
+      start.textContent = initialLabel; box.classList.remove("finished"); box.classList.remove("preparing"); announcement.textContent = ""; paint();
     });
     box.append(output, start, reset, announcement); return box;
   }

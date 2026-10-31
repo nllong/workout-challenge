@@ -97,6 +97,23 @@
         });
       } catch (_) { status.textContent = "The chime could not play. Tap Test chime and check your volume."; }
     }
+    async function startBuzzer() {
+      if (!soundToggle.checked) return;
+      unlockSound();
+      if (!audio) return;
+      try {
+        if (audio.state === "suspended" || audio.state === "interrupted") await audio.resume();
+        if (audio.state !== "running" || !soundToggle.checked) return;
+        const tone = audio.createOscillator(), gain = audio.createGain(), at = audio.currentTime;
+        tone.type = "triangle"; tone.frequency.setValueAtTime(220, at);
+        gain.gain.setValueAtTime(.0001, at);
+        gain.gain.linearRampToValueAtTime(.18, at + .015);
+        gain.gain.exponentialRampToValueAtTime(.0001, at + .22);
+        tone.connect(gain); gain.connect(audio.destination);
+        tone.onended = () => { tones.delete(tone); tone.disconnect(); gain.disconnect(); };
+        tones.add(tone); tone.start(at); tone.stop(at + .23);
+      } catch (_) { status.textContent = "Start buzzer unavailable. Follow the on-screen countdown."; }
+    }
     function supportsNotifications() {
       return !!(!isIOS && host.isSecureContext && host.Notification && host.navigator.serviceWorker);
     }
@@ -185,7 +202,7 @@
     testButton.addEventListener("click", () => { unlockSound(); void playChime(); });
     notificationButton.addEventListener("click", enableNotifications);
     refreshPermission();
-    return { unlockSound, finished, dismiss, setActiveTimers };
+    return { unlockSound, startBuzzer, finished, dismiss, setActiveTimers };
   }
   return { create };
 });
