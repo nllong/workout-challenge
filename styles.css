@@ -23,7 +23,7 @@ h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 800; }
 p + p { margin-top: .7rem; }
 [hidden] { display: none !important; }
 a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
-.site-header, main { width: min(1090px, calc(100% - 56px)); margin: auto; }
+.site-header, main { width: min(760px, calc(100% - 56px)); margin: auto; }
 .site-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 23px 0; border-bottom: 2px solid var(--border); }
 .brand { text-decoration: none; font-size: 1.25rem; font-weight: 900; letter-spacing: .03em; }
 .brand-mark { display: inline-flex; justify-content: center; align-items: center; width: 36px; height: 36px; background: var(--rose); border: 2px solid var(--line); border-radius: 13px; box-shadow: 2px 2px 0 var(--line); color: var(--ink); margin-right: 10px; transform: rotate(-8deg); }
@@ -51,7 +51,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visibl
 [data-kind=rest] .buddy-zzz { display: block; }
 [data-kind=finale] .buddy-body { fill: var(--rose); }
 .panel { background: var(--panel); border: 2px solid var(--line); border-radius: 25px; padding: 28px; box-shadow: 4px 4px 0 var(--line); }
-.workout-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 .day-top, .day-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .day-top .eyebrow { color: var(--accent); }
 .text-link { color: var(--accent); font-size: .86rem; font-weight: 800; text-underline-offset: 4px; }
@@ -89,7 +88,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visibl
 .finished .timer-display { color: var(--accent); }
 .day-nav { display: flex; justify-content: space-between; gap: 15px; margin-top: 26px; }
 .day-nav .button:last-child { margin-left: auto; }
-.progress-panel { background: var(--panel-2); }
+.progress-panel { background: var(--panel-2); margin-top: 28px; }
 .progress-panel > .eyebrow { color: var(--muted); margin-bottom: 15px; }
 .progress-heading { display: flex; align-items: center; justify-content: space-between; gap: 9px; }
 .progress-heading h2 { font-size: 1.4rem; }
@@ -99,7 +98,7 @@ progress::-webkit-progress-bar { background: var(--panel); }
 progress::-webkit-progress-value { background: var(--accent); }
 progress::-moz-progress-bar { background: var(--accent); }
 .progress-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 9px; }
-.grid-day { display: flex; justify-content: center; align-items: center; aspect-ratio: 1; min-height: 44px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--panel); text-decoration: none; font-size: .9rem; font-weight: 800; position: relative; font-variant-numeric: tabular-nums; }
+.grid-day { display: flex; justify-content: center; align-items: center; aspect-ratio: auto; height: 52px; min-height: 44px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--panel); text-decoration: none; font-size: .9rem; font-weight: 800; position: relative; font-variant-numeric: tabular-nums; }
 .grid-day.selected { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
 .grid-day.complete { background: var(--accent); color: var(--panel); border-color: var(--accent); }
 .legend { display: flex; flex-wrap: wrap; gap: 10px 15px; color: var(--muted); font-size: .75rem; margin: 20px 0; }
@@ -151,15 +150,13 @@ footer { display: flex; justify-content: space-between; gap: 15px; color: var(--
 #fatal h1 { font-size: 2rem; }
 #fatal p { margin: 20px 0; }
 @media (max-width: 900px) {
-  .site-header, main { width: calc(100% - 40px); }
+  .site-header, main { width: min(760px, calc(100% - 40px)); }
   .panel { padding: 23px; }
-  .workout-layout { grid-template-columns: minmax(0,1.4fr) minmax(0,1fr); gap: 19px; }
   .progress-grid { gap: 7px; }
   .grid-day { min-height: 37px; }
-  .progress-heading { align-items: start; flex-direction: column; }
 }
 @media (max-width: 700px) {
-  .site-header, main { width: calc(100% - 32px); }
+  .site-header, main { width: min(760px, calc(100% - 32px)); }
   .site-header { padding: 17px 0; }
   .header-note { font-size: .55rem; max-width: 120px; text-align: right; }
   .intro { gap: 10px; padding: 27px 0; }
@@ -169,7 +166,6 @@ footer { display: flex; justify-content: space-between; gap: 15px; color: var(--
   .mascot-scene { width: 104px; }
   .mascot { width: 100px; height: 105px; }
   .mascot-bubble { font-size: .62rem; padding: 5px 7px; }
-  .workout-layout { grid-template-columns: 1fr; }
   .panel { padding: 21px; border-radius: 21px; }
   .day-heading h2 { font-size: 3.2rem; }
   .day-heading p { max-width: 130px; font-size: .85rem; }

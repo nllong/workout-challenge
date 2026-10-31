@@ -24,6 +24,16 @@
 <main id="main">
   <div id="fatal" class="panel" hidden role="alert"></div>
   <div id="challenge" hidden>
+    <section class="progress-panel panel" aria-labelledby="progress-title">
+      <p class="eyebrow">YOUR CHALLENGE CALENDAR</p><div class="progress-heading"><h2 id="progress-title">Your momentum</h2><span id="progress-count"></span></div>
+      <progress id="progress-bar" max="30" value="0" aria-label="Completed days"></progress>
+      <div id="progress-grid" class="progress-grid" aria-label="30-day progress"></div>
+      <div class="legend"><span><i class="legend-done"></i> Completed</span></div>
+      <p class="small muted">Open today or revisit completed days. The rest unlock one day at a time.</p>
+      <p id="navigation-notice" class="small muted" role="status"></p>
+      <p class="small muted">Checkmarks and max logs stay in this browser. Day links carry the full challenge, so the workout opens on any device.</p>
+      <p id="storage-warning" class="notice small" hidden role="status">Browser storage is unavailable. You can still use the workout; progress will last only until this page closes.</p>
+    </section>
     <section class="intro">
       <div><p class="eyebrow" id="month-label"></p><h1><span id="hero-line">Small steps.</span><br><span id="hero-accent">Big smiles.</span></h1><p class="lede" id="hero-lede">A little movement. A little joy. You've got this!</p></div>
       <div class="mascot-scene" aria-hidden="true">
@@ -44,79 +54,67 @@
       </div>
     </section>
     <p id="date-notice" class="notice" hidden></p>
-    <div class="workout-layout">
-      <section class="day-panel panel" aria-labelledby="day-title">
-        <div class="day-top"><p class="eyebrow" id="day-kind"></p><a id="today-link" class="text-link" href="./">Back to today ↗</a></div>
-        <div class="day-heading"><h2 id="day-title"></h2><p id="day-date"></p></div>
-        <p id="day-instruction" class="muted"></p>
-        <section id="mode-banner" class="mode-banner" aria-labelledby="mode-title" hidden><h3 id="mode-title"></h3><p id="mode-copy"></p></section>
-        <aside class="daily-boost" aria-labelledby="encouragement-title">
-          <p class="eyebrow">YOUR DAILY BOOST</p>
-          <h3 id="encouragement-title"></h3>
-          <p id="encouragement-copy"></p>
-        </aside>
-        <details class="timer-settings">
-          <summary>Timer sound &amp; alerts</summary>
-          <label class="done-label"><input id="timer-sound" type="checkbox" checked> Play a chime when timers finish</label>
-          <div class="timer-alert-buttons">
-            <button id="timer-test-sound" class="button secondary" type="button">Test chime</button>
-            <button id="timer-enable-notifications" class="button secondary" type="button">Enable browser alerts</button>
-          </div>
-          <p class="small muted">Keep this page open for timer alerts. Locked or sleeping phones may delay them.</p>
-          <p id="timer-alert-status" class="small" role="status"></p>
-        </details>
-        <div id="exercises"></div>
-        <div id="completed" class="completion" hidden role="status"></div>
-        <div id="finale-celebration" class="finale-celebration" hidden>
-          <span class="celebration-stars" aria-hidden="true">★ ★ ★</span>
-          <h3>Day 30. Done. High five!</h3>
-          <p>Your final workout deserves a big celebration. Take a moment to enjoy this win!</p>
-        </div>
-        <section id="tracker-checkin" class="tracker-checkin" aria-labelledby="tracker-title" hidden>
-          <p class="eyebrow">ONE LAST LITTLE CHECK-IN</p>
-          <h3 id="tracker-title">A note for your tracker chat</h3>
-          <p class="small muted">Answer these quick questions, then copy and paste your summary into your workout tracker chat.</p>
-          <label for="tracker-modified">Did you modify anything?</label>
-          <select id="tracker-modified">
-            <option value="">Choose an answer…</option>
-            <option value="no">No — completed as planned</option>
-            <option value="yes">Yes — I made changes</option>
-          </select>
-          <div id="tracker-modification-details" hidden>
-            <label for="tracker-modifications">What did you change?</label>
-            <textarea id="tracker-modifications" rows="3" maxlength="2000" placeholder="Actual reps or time, substitutions, skipped exercises, extra breaks…"></textarea>
-          </div>
-          <label for="tracker-rpe">Overall RPE <span id="tracker-rpe-optional" class="small" hidden>(optional on rest days)</span></label>
-          <p id="tracker-rpe-help" class="small muted">Rate the whole session: 0 = no effort, 10 = maximum effort.</p>
-          <select id="tracker-rpe" aria-describedby="tracker-rpe-help">
-            <option value="">Choose RPE…</option>
-            <option value="0">0 — No effort</option><option value="1">1</option>
-            <option value="2">2</option><option value="3">3</option><option value="4">4</option>
-            <option value="5">5</option><option value="6">6</option><option value="7">7</option>
-            <option value="8">8</option><option value="9">9</option><option value="10">10 — Maximum effort</option>
-          </select>
-          <p id="tracker-hint" class="small" role="status"></p>
-          <div id="tracker-preview" hidden>
-            <label for="tracker-note">Your tracker note</label>
-            <textarea id="tracker-note" rows="11" readonly spellcheck="false"></textarea>
-          </div>
-          <button id="tracker-copy" class="button" type="button" disabled>Copy tracker note</button>
-          <p id="tracker-copy-status" class="small" role="status"></p>
-        </section>
-        <div id="up-next" class="up-next" hidden></div>
-        <nav class="day-nav" aria-label="Workout days"><a id="previous" class="button secondary"></a><a id="next" class="button"></a></nav>
-      </section>
-      <aside class="progress-panel panel" aria-labelledby="progress-title">
-        <p class="eyebrow">THE BIG PICTURE</p><div class="progress-heading"><h2 id="progress-title">Your momentum</h2><span id="progress-count"></span></div>
-        <progress id="progress-bar" max="30" value="0" aria-label="Completed days"></progress>
-        <div id="progress-grid" class="progress-grid" aria-label="30-day progress"></div>
-        <div class="legend"><span><i class="legend-done"></i> Completed</span></div>
-        <p class="small muted">Open today or revisit completed days. The rest unlock one day at a time.</p>
-        <p id="navigation-notice" class="small muted" role="status"></p>
-        <p class="small muted">Checkmarks and max logs stay in this browser. Day links carry the full challenge, so the workout opens on any device.</p>
-        <p id="storage-warning" class="notice small" hidden role="status">Browser storage is unavailable. You can still use the workout; progress will last only until this page closes.</p>
+    <section class="day-panel panel" aria-labelledby="day-title">
+      <div class="day-top"><p class="eyebrow" id="day-kind"></p><a id="today-link" class="text-link" href="./">Back to today ↗</a></div>
+      <div class="day-heading"><h2 id="day-title"></h2><p id="day-date"></p></div>
+      <p id="day-instruction" class="muted"></p>
+      <section id="mode-banner" class="mode-banner" aria-labelledby="mode-title" hidden><h3 id="mode-title"></h3><p id="mode-copy"></p></section>
+      <aside class="daily-boost" aria-labelledby="encouragement-title">
+        <p class="eyebrow">YOUR DAILY BOOST</p>
+        <h3 id="encouragement-title"></h3>
+        <p id="encouragement-copy"></p>
       </aside>
-    </div>
+      <details class="timer-settings">
+        <summary>Timer sound &amp; alerts</summary>
+        <label class="done-label"><input id="timer-sound" type="checkbox" checked> Play a chime when timers finish</label>
+        <div class="timer-alert-buttons">
+          <button id="timer-test-sound" class="button secondary" type="button">Test chime</button>
+          <button id="timer-enable-notifications" class="button secondary" type="button">Enable browser alerts</button>
+        </div>
+        <p class="small muted">Keep this page open for timer alerts. Locked or sleeping phones may delay them.</p>
+        <p id="timer-alert-status" class="small" role="status"></p>
+      </details>
+      <div id="exercises"></div>
+      <div id="completed" class="completion" hidden role="status"></div>
+      <div id="finale-celebration" class="finale-celebration" hidden>
+        <span class="celebration-stars" aria-hidden="true">★ ★ ★</span>
+        <h3>Day 30. Done. High five!</h3>
+        <p>Your final workout deserves a big celebration. Take a moment to enjoy this win!</p>
+      </div>
+      <section id="tracker-checkin" class="tracker-checkin" aria-labelledby="tracker-title" hidden>
+        <p class="eyebrow">ONE LAST LITTLE CHECK-IN</p>
+        <h3 id="tracker-title">A note for your tracker chat</h3>
+        <p class="small muted">Answer these quick questions, then copy and paste your summary into your workout tracker chat.</p>
+        <label for="tracker-modified">Did you modify anything?</label>
+        <select id="tracker-modified">
+          <option value="">Choose an answer…</option>
+          <option value="no">No — completed as planned</option>
+          <option value="yes">Yes — I made changes</option>
+        </select>
+        <div id="tracker-modification-details" hidden>
+          <label for="tracker-modifications">What did you change?</label>
+          <textarea id="tracker-modifications" rows="3" maxlength="2000" placeholder="Actual reps or time, substitutions, skipped exercises, extra breaks…"></textarea>
+        </div>
+        <label for="tracker-rpe">Overall RPE <span id="tracker-rpe-optional" class="small" hidden>(optional on rest days)</span></label>
+        <p id="tracker-rpe-help" class="small muted">Rate the whole session: 0 = no effort, 10 = maximum effort.</p>
+        <select id="tracker-rpe" aria-describedby="tracker-rpe-help">
+          <option value="">Choose RPE…</option>
+          <option value="0">0 — No effort</option><option value="1">1</option>
+          <option value="2">2</option><option value="3">3</option><option value="4">4</option>
+          <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+          <option value="8">8</option><option value="9">9</option><option value="10">10 — Maximum effort</option>
+        </select>
+        <p id="tracker-hint" class="small" role="status"></p>
+        <div id="tracker-preview" hidden>
+          <label for="tracker-note">Your tracker note</label>
+          <textarea id="tracker-note" rows="11" readonly spellcheck="false"></textarea>
+        </div>
+        <button id="tracker-copy" class="button" type="button" disabled>Copy tracker note</button>
+        <p id="tracker-copy-status" class="small" role="status"></p>
+      </section>
+      <div id="up-next" class="up-next" hidden></div>
+      <nav class="day-nav" aria-label="Workout days"><a id="previous" class="button secondary"></a><a id="next" class="button"></a></nav>
+    </section>
     <section class="calendar-panel panel" aria-labelledby="calendar-title">
       <div><p class="eyebrow">MAKE ROOM FOR YOURSELF</p><h2 id="calendar-title">Put it on your calendar.</h2><p id="calendar-copy" class="muted"></p></div>
       <button id="export" class="button" type="button">↓ Download calendar</button>
