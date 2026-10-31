@@ -21,10 +21,12 @@ Progress and workout check-ins are saved in the browser you use. Keep the page o
 
 Plain HTML, CSS, and JavaScript. No build step.
 
-Open `index.html`, or preview locally:
+Start the local app at http://127.0.0.1:8080:
 
 ```sh
-python3 -m http.server 8080
+make dev
 ```
+
+Requires Python 3. No packages to install or update. Use `make dev PORT=8081` to change the port.
 
 Edit [challenge.js](challenge.js) for the next challenge, then redeploy through GitHub Pages. Cloudflare handles public HTTPS; keep its DNS record **Proxied**.
