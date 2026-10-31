@@ -1,5 +1,5 @@
 // November's exact schedule. Edit this file and change id for each new challenge.
-// All timed amounts are seconds. Each block is [number of days, crunches, push-ups, twists].
+// All timed amounts are seconds. Each block is [number of days, crunches, push-ups, Ukrainian twists].
 // Day-specific amounts below are explicit; no automatic halving or rounding is applied.
 (() => {
   const blocks = [
@@ -34,7 +34,7 @@
     exercises: [
       { name: "reverse crunches", type: "timed" },
       { name: "push-ups", type: "reps" },
-      { name: "twists", type: "timed" }
+      { name: "Ukrainian twists", type: "timed" }
     ],
     schedule
   };

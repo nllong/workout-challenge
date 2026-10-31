@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="670" viewBox="0 0 1200 670" role="img" aria-labelledby="title desc">
 <title id="title">Lighter days and a big finish</title>
-<desc id="desc">An illustrated preview of day 24 with 45 seconds of reverse crunches, 19 push-ups and 70 seconds of twists, alongside a confetti celebration and workout recap.</desc>
+<desc id="desc">An illustrated preview of day 24 with 45 seconds of reverse crunches, 19 push-ups and 70 seconds of Ukrainian twists, alongside a confetti celebration and workout recap.</desc>
 <style>
 text{font-family:'Trebuchet MS',Arial,sans-serif;fill:#44254d}
 .buddy-body{fill:#f6c4e0;stroke:#57355f;stroke-width:3}
@@ -29,7 +29,7 @@ text{font-family:'Trebuchet MS',Arial,sans-serif;fill:#44254d}
 <text x="75" y="406" font-size="24" font-weight="bold">Push-ups</text>
 <text x="550" y="406" text-anchor="end" font-size="30" font-weight="bold">19</text>
 <path d="M75 435H550" stroke="#bba4c6" stroke-width="2" stroke-dasharray="5 5"/>
-<text x="75" y="486" font-size="24" font-weight="bold">Twists</text>
+<text x="75" y="486" font-size="24" font-weight="bold">Ukrainian twists</text>
 <text x="550" y="486" text-anchor="end" font-size="30" font-weight="bold">1:10</text>
 <rect x="75" y="535" width="480" height="49" rx="15" fill="#f6c4e0" stroke="#57355f" stroke-width="2"/>
 <text x="315" y="567" text-anchor="middle" font-size="20" font-weight="bold">Timers + checkmarks</text>
