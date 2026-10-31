@@ -8,12 +8,12 @@
 <meta name="description" content="A cheerful monthly workout challenge with lighter deload days, timers, progress, and calendar reminders.">
 <title>Daily / Workout challenge</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css?v=20261031-2">
-<script defer src="core.js?v=20261031-2"></script>
-<script defer src="challenge.js?v=20261031-2"></script>
-<script defer src="joy.js?v=20261031-2"></script>
-<script defer src="timer-alerts.js?v=20261031-2"></script>
-<script defer src="app.js?v=20261031-2"></script>
+<link rel="stylesheet" href="styles.css?v=20261031-3">
+<script defer src="core.js?v=20261031-3"></script>
+<script defer src="challenge.js?v=20261031-3"></script>
+<script defer src="joy.js?v=20261031-3"></script>
+<script defer src="timer-alerts.js?v=20261031-3"></script>
+<script defer src="app.js?v=20261031-3"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to workout</a>
@@ -24,18 +24,8 @@
 <main id="main">
   <div id="fatal" class="panel" hidden role="alert"></div>
   <div id="challenge" hidden>
-    <section class="progress-panel panel" aria-labelledby="progress-title">
-      <p class="eyebrow">YOUR CHALLENGE CALENDAR</p><div class="progress-heading"><h2 id="progress-title">Your momentum</h2><span id="progress-count"></span></div>
-      <progress id="progress-bar" max="30" value="0" aria-label="Completed days"></progress>
-      <div id="progress-grid" class="progress-grid" aria-label="30-day progress"></div>
-      <div class="legend"><span><i class="legend-done"></i> Completed</span></div>
-      <p class="small muted">Open today or revisit completed days. The rest unlock one day at a time.</p>
-      <p id="navigation-notice" class="small muted" role="status"></p>
-      <p class="small muted">Checkmarks and max logs stay in this browser. Day links carry the full challenge, so the workout opens on any device.</p>
-      <p id="storage-warning" class="notice small" hidden role="status">Browser storage is unavailable. You can still use the workout; progress will last only until this page closes.</p>
-    </section>
     <section class="intro">
-      <div><p class="eyebrow" id="month-label"></p><h1><span id="hero-line">Small steps.</span><br><span id="hero-accent">Big smiles.</span></h1><p class="lede" id="hero-lede">A little movement. A little joy. You've got this!</p></div>
+      <div><p class="eyebrow" id="month-label"></p><h1><span id="hero-line">Small steps,</span><br><span id="hero-accent">Huge gains.</span></h1><p class="lede" id="hero-lede">A little movement. A little joy. You've got this!</p></div>
       <div class="mascot-scene" aria-hidden="true">
         <svg class="mascot" viewBox="0 0 210 180" xmlns="http://www.w3.org/2000/svg">
           <path class="buddy-star" d="m27 21 4 9 10 1-8 7 2 10-9-5-9 5 2-10-8-7 11-1Z"/>
@@ -52,6 +42,16 @@
         </svg>
         <p id="mascot-message" class="mascot-bubble">You've got this!</p>
       </div>
+    </section>
+    <section class="progress-panel panel" aria-labelledby="progress-title">
+      <p class="eyebrow">YOUR CHALLENGE CALENDAR</p><div class="progress-heading"><h2 id="progress-title">Your momentum</h2><span id="progress-count"></span></div>
+      <progress id="progress-bar" max="30" value="0" aria-label="Completed days"></progress>
+      <div id="progress-grid" class="progress-grid" aria-label="30-day progress"></div>
+      <div class="legend"><span><i class="legend-done"></i> Completed</span></div>
+      <p class="small muted">Open today or revisit completed days. The rest unlock one day at a time.</p>
+      <p id="navigation-notice" class="small muted" role="status"></p>
+      <p class="small muted">Checkmarks and max logs stay in this browser. Day links carry the full challenge, so the workout opens on any device.</p>
+      <p id="storage-warning" class="notice small" hidden role="status">Browser storage is unavailable. You can still use the workout; progress will last only until this page closes.</p>
     </section>
     <p id="date-notice" class="notice" hidden></p>
     <section class="day-panel panel" aria-labelledby="day-title">

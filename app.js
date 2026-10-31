@@ -322,7 +322,7 @@
   function renderMood(d) {
     $("challenge").dataset.kind = d.kind;
     const copy = {
-      workout: ["Small steps.", "Big smiles.", "A little movement. A little joy. You've got this!", "You've got this!"],
+      workout: ["Small steps,", "Huge gains.", "A little movement. A little joy. You've got this!", "You've got this!"],
       deload: ["Take it light.", "You're doing great!", "A little breather is part of your challenge.", "Easy does it!"],
       rest: ["Feet up.", "Joy levels up.", "Rest is on the plan. Give yourself room to recharge.", "Recharge time!"],
       finale: ["Big finish.", "Bigger high five!", "Your day-30 targets. Let's celebrate showing up.", "Go, superstar!"],

@@ -88,7 +88,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visibl
 .finished .timer-display { color: var(--accent); }
 .day-nav { display: flex; justify-content: space-between; gap: 15px; margin-top: 26px; }
 .day-nav .button:last-child { margin-left: auto; }
-.progress-panel { background: var(--panel-2); margin-top: 28px; }
+.progress-panel { background: var(--panel-2); margin-bottom: 28px; }
 .progress-panel > .eyebrow { color: var(--muted); margin-bottom: 15px; }
 .progress-heading { display: flex; align-items: center; justify-content: space-between; gap: 9px; }
 .progress-heading h2 { font-size: 1.4rem; }
