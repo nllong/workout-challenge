@@ -50,7 +50,7 @@
     });
     const soundKey = "daily-workout:timer-sound";
     let audio = null, registration = null, registrationFailed = false;
-    const tones = new Set();
+    const tones = new Set(), completions = new Set();
     try { soundToggle.checked = host.localStorage.getItem(soundKey) !== "off"; } catch (_) { soundToggle.checked = true; }
     testButton.disabled = !soundToggle.checked;
     function stopSound() {
@@ -176,13 +176,16 @@
       }
     }
     function dismiss() {
+      completions.clear();
       stopSound();
       if (dialog.open && typeof dialog.close === "function") dialog.close();
       else dialog.removeAttribute("open");
       dialog.classList.remove("fallback-open");
       list.replaceChildren();
     }
-    function finished(name, link) {
+    function finished(name, link, onComplete) {
+      if (typeof onComplete === "function") completions.add(onComplete);
+      $("timer-dismiss").textContent = completions.size > 1 ? "Mark exercises done" : "Mark exercise done";
       const item = doc.createElement("li"); item.textContent = name + " timer complete.";
       list.append(item);
       if (!dialog.open) {
@@ -192,8 +195,13 @@
       void playChime();
       void browserAlert(name, link);
     }
-    $("timer-dismiss").addEventListener("click", dismiss);
-    dialog.addEventListener("close", () => { stopSound(); list.replaceChildren(); });
+    $("timer-dismiss").addEventListener("click", () => {
+      const actions = [...completions];
+      dismiss();
+      actions.forEach(action => action());
+    });
+    $("timer-not-yet").addEventListener("click", dismiss);
+    dialog.addEventListener("close", () => { completions.clear(); stopSound(); list.replaceChildren(); });
     soundToggle.addEventListener("change", () => {
       try { host.localStorage.setItem(soundKey, soundToggle.checked ? "on" : "off"); } catch (_) {}
       testButton.disabled = !soundToggle.checked;

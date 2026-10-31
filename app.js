@@ -108,7 +108,7 @@
   function formatDate(date, options) { return new Intl.DateTimeFormat("en-US", { timeZone: "UTC", ...options }).format(new Date(date + "T12:00:00Z")); }
   function formatTime(seconds) { return String(Math.floor(seconds / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0"); }
   function disposeTimers() { timers.forEach(clearInterval); timers.clear(); timerAlerts.setActiveTimers(0); timerAlerts.dismiss(); }
-  function makeTimer(e, kind, maxInput) {
+  function makeTimer(e, kind, maxInput, onComplete) {
     const box = el("div", "timer");
     const output = el("output", "timer-display", kind === "test" ? "00:00" : formatTime(e.amount));
     output.setAttribute("aria-label", e.name + (kind === "test" ? " elapsed time" : " time remaining"));
@@ -142,7 +142,7 @@
         remaining = 0; running = false; stopInterval();
         start.textContent = "Start again"; announcement.textContent = e.name + " timer complete. Mark the exercise done when ready.";
         box.classList.add("finished");
-        timerAlerts.finished(e.name, internalUrl(selected));
+        timerAlerts.finished(e.name, internalUrl(selected), onComplete);
       }
       return ms;
     }
@@ -207,13 +207,16 @@
         });
         card.append(label, maxInput);
       }
-      if (e.type === "timed") card.append(makeTimer(e, d.kind, maxInput));
       const label = el("label", "done-label"); const check = document.createElement("input"); check.type = "checkbox"; check.checked = log["done" + e.index] === true;
       label.append(check, document.createTextNode("Done"), el("span", "sr-only", " with " + e.name));
       check.addEventListener("change", () => {
         card.classList.toggle("is-done", check.checked);
         saveDay(d.day, { ...dayLog(d.day), ["done" + e.index]: check.checked });
       });
+      if (e.type === "timed") card.append(makeTimer(e, d.kind, maxInput, () => {
+        check.checked = true; card.classList.add("is-done");
+        saveDay(d.day, { ...dayLog(d.day), ["done" + e.index]: true });
+      }));
       card.classList.toggle("is-done", check.checked); card.append(label); container.append(card);
     });
   }
