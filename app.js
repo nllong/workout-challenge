@@ -385,7 +385,7 @@
       const ics = C.makeICS(config), report = C.inspectICS(ics);
       $("validation-result").textContent = "Passed: 1 recurring event · " + report.occurrences + " days · 15 minutes each · start-time alert · " + report.timeZone + " · website link.";
       $("sample-event").textContent = report.sample; $("sample-event").hidden = false;
-      if (previewOnly) { status.textContent = "Calendar validated. The sample below is unfolded for readability."; return; }
+      if (previewOnly) { status.textContent = "Calendar validated. The sample above is unfolded for readability."; return; }
       const blobUrl = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
       const link = el("a"); link.href = blobUrl; link.download = config.id + ".ics"; document.body.append(link); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
