@@ -27,4 +27,4 @@ Open `index.html`, or preview locally:
 python3 -m http.server 8080
 ```
 
-Edit [challenge.js](challenge.js) for the next challenge, then redeploy through GitHub Pages. Keep the Cloudflare DNS record **Proxied**.
+Edit [challenge.js](challenge.js) for the next challenge, then redeploy through GitHub Pages. Cloudflare handles public HTTPS; keep its DNS record **Proxied**.
