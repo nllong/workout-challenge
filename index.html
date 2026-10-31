@@ -8,12 +8,12 @@
 <meta name="description" content="A cheerful monthly workout challenge with lighter deload days, timers, progress, and calendar reminders.">
 <title>Daily / Workout challenge</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css?v=20261031-1">
-<script defer src="core.js?v=20261031-1"></script>
-<script defer src="challenge.js?v=20261031-1"></script>
-<script defer src="joy.js?v=20261031-1"></script>
-<script defer src="timer-alerts.js?v=20261031-1"></script>
-<script defer src="app.js?v=20261031-1"></script>
+<link rel="stylesheet" href="styles.css?v=20261031-2">
+<script defer src="core.js?v=20261031-2"></script>
+<script defer src="challenge.js?v=20261031-2"></script>
+<script defer src="joy.js?v=20261031-2"></script>
+<script defer src="timer-alerts.js?v=20261031-2"></script>
+<script defer src="app.js?v=20261031-2"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to workout</a>
@@ -71,7 +71,8 @@
           <button id="timer-test-sound" class="button secondary" type="button">Test chime</button>
           <button id="timer-enable-notifications" class="button secondary" type="button">Enable browser alerts</button>
         </div>
-        <p class="small muted">Keep this page open for timer alerts. Locked or sleeping phones may delay them.</p>
+        <p class="small muted">On iPhone, tap Test chime once and keep Safari visible. We try to keep the screen awake while timers run. Locking the phone or switching apps can delay alerts.</p>
+        <p id="timer-screen-status" class="small muted" role="status"></p>
         <p id="timer-alert-status" class="small" role="status"></p>
       </details>
       <div id="exercises"></div>

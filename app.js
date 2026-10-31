@@ -107,7 +107,7 @@
   function goLink(node, n, label) { node.href = internalUrl(n); node.dataset.day = String(n); if (label) node.textContent = label; }
   function formatDate(date, options) { return new Intl.DateTimeFormat("en-US", { timeZone: "UTC", ...options }).format(new Date(date + "T12:00:00Z")); }
   function formatTime(seconds) { return String(Math.floor(seconds / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0"); }
-  function disposeTimers() { timers.forEach(clearInterval); timers.clear(); timerAlerts.dismiss(); }
+  function disposeTimers() { timers.forEach(clearInterval); timers.clear(); timerAlerts.setActiveTimers(0); timerAlerts.dismiss(); }
   function makeTimer(e, kind, maxInput) {
     const box = el("div", "timer");
     const output = el("output", "timer-display", kind === "test" ? "00:00" : formatTime(e.amount));
@@ -122,7 +122,7 @@
       const seconds = kind === "test" ? Math.floor(ms / 1000) : Math.ceil(ms / 1000);
       output.textContent = formatTime(seconds);
       if (running && kind !== "test" && ms <= 0) {
-        remaining = 0; running = false; clearInterval(interval); timers.delete(interval);
+        remaining = 0; running = false; clearInterval(interval); timers.delete(interval); timerAlerts.setActiveTimers(timers.size);
         start.textContent = "Start again"; announcement.textContent = e.name + " timer complete. Mark the exercise done when ready.";
         box.classList.add("finished");
         timerAlerts.finished(e.name, internalUrl(selected));
@@ -133,7 +133,7 @@
       if (running) {
         const ms = paint();
         if (!running) return;
-        remaining = ms; running = false; clearInterval(interval); timers.delete(interval);
+        remaining = ms; running = false; clearInterval(interval); timers.delete(interval); timerAlerts.setActiveTimers(timers.size);
         start.textContent = kind === "test" ? "Resume max timer" : "Resume";
         if (kind === "test") {
           maxInput.value = String(Math.floor(remaining / 1000));
@@ -145,11 +145,11 @@
         if (kind !== "test" && remaining <= 0) remaining = e.amount * 1000;
         anchor = Date.now(); running = true; box.classList.remove("finished"); announcement.textContent = "";
         start.textContent = kind === "test" ? "Stop & log" : "Pause";
-        interval = setInterval(paint, 200); timers.add(interval); paint();
+        interval = setInterval(paint, 200); timers.add(interval); timerAlerts.setActiveTimers(timers.size); paint();
       }
     });
     reset.addEventListener("click", () => {
-      clearInterval(interval); timers.delete(interval); running = false; remaining = kind === "test" ? 0 : e.amount * 1000;
+      clearInterval(interval); timers.delete(interval); timerAlerts.setActiveTimers(timers.size); running = false; remaining = kind === "test" ? 0 : e.amount * 1000;
       start.textContent = kind === "test" ? "Start max timer" : "Start timer"; box.classList.remove("finished"); announcement.textContent = ""; paint();
     });
     box.append(output, start, reset, announcement); return box;
