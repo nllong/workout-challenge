@@ -402,7 +402,7 @@
     const messages = {
       deload: ["Deload day! Less load, same gold star.", "Today's lighter targets are already set below. Enjoy the easy pace."],
       rest: ["Permission to put your feet up.", "No exercises today. A little recharge before tomorrow's finale."],
-      finale: ["Your big finish is here!", "2:00 reverse crunches · 50 push-ups · 3:00 Ukrainian twists. These are fixed targets, not a max test."]
+      finale: ["Your big finish is here!", "2:00 reverse crunches · 40 push-ups · 1:30 Ukrainian twists. These are fixed targets, not a max test."]
     };
     const mode = messages[d.kind];
     $("mode-banner").hidden = !mode;
@@ -435,22 +435,31 @@
     const params = new URLSearchParams(location.search);
     const packed = params.get("plan"), dayValue = params.get("day");
     if (dayValue !== null && !packed) throw new Error("This day link is missing its plan. Open the home page for the current challenge.");
-    config = packed ? C.decodeConfig(packed) : C.validate(window.WORKOUT_CHALLENGE);
-    // Apply the renamed label to previously shared day links as well.
-    config = { ...config, exercises: config.exercises.map(e =>
-      e.name === "twists" ? { ...e, name: "Ukrainian twists" } : e) };
+    const normalizeNames = plan => ({ ...plan, exercises: plan.exercises.map(e =>
+      e.name === "twists" ? { ...e, name: "Ukrainian twists" } : e) });
+    const currentPlan = C.validate(window.WORKOUT_CHALLENGE);
+    const previousPlans = (window.WORKOUT_PREVIOUS_CHALLENGES || []).map(plan => C.validate(plan));
+    config = normalizeNames(packed ? C.decodeConfig(packed) : currentPlan);
+    // Old links for this exact November plan should use the revised targets too.
+    if (previousPlans.some(plan => C.encodeConfig(plan) === C.encodeConfig(config))) config = currentPlan;
     days = C.plan(config); refreshDate();
     if (dayValue !== null && !/^(?:[1-9]|[12]\d|30)$/.test(dayValue)) throw new Error("Choose a day from 1 to 30.");
     selected = dayValue === null ? today.day : Number(dayValue);
     storageKey = "daily-workout:v1:" + C.encodeConfig(config);
     let saved = read(storageKey);
-    // A display-name change should not discard the existing challenge logs.
-    if (saved === null && config.exercises.some(e => e.name === "Ukrainian twists")) {
-      const previous = { ...config, exercises: config.exercises.map(e =>
-        e.name === "Ukrainian twists" ? { ...e, name: "twists" } : e) };
-      const legacy = read("daily-workout:v1:" + C.encodeConfig(previous));
-      if (legacy && typeof legacy === "object" && !Array.isArray(legacy)) {
-        saved = legacy; write(storageKey, saved);
+    const oldName = plan => ({ ...plan, exercises: plan.exercises.map(e =>
+      e.name === "Ukrainian twists" ? { ...e, name: "twists" } : e) });
+    const sources = [oldName(config)];
+    if (C.encodeConfig(config) === C.encodeConfig(currentPlan)) {
+      previousPlans.forEach(plan => sources.push(plan, oldName(plan)));
+    }
+    // Copy logs only when no new record exists; reset's empty record stays empty.
+    if (saved === null) {
+      for (const previous of sources) {
+        const legacy = read("daily-workout:v1:" + C.encodeConfig(previous));
+        if (legacy && typeof legacy === "object" && !Array.isArray(legacy)) {
+          saved = legacy; write(storageKey, saved); break;
+        }
       }
     }
     logs = saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
