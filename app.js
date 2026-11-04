@@ -402,7 +402,7 @@
     const messages = {
       deload: ["Deload day! Less load, same gold star.", "Today's lighter targets are already set below. Enjoy the easy pace."],
       rest: ["Permission to put your feet up.", "No exercises today. A little recharge before tomorrow's finale."],
-      finale: ["Your big finish is here!", "2:00 reverse crunches · 40 push-ups · 1:30 Ukrainian twists. These are fixed targets, not a max test."]
+      finale: ["Your big finish is here!", "4:00 reverse crunches · 40 push-ups · 1:30 Ukrainian twists. These are fixed targets, not a max test."]
     };
     const mode = messages[d.kind];
     $("mode-banner").hidden = !mode;
