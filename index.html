@@ -8,12 +8,12 @@
 <meta name="description" content="A cheerful monthly workout challenge with lighter deload days, timers, progress, and calendar reminders.">
 <title>Daily / Workout challenge</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css?v=20261105-1">
-<script defer src="core.js?v=20261105-1"></script>
-<script defer src="challenge.js?v=20261105-1"></script>
-<script defer src="joy.js?v=20261105-1"></script>
-<script defer src="timer-alerts.js?v=20261105-1"></script>
-<script defer src="app.js?v=20261105-1"></script>
+<link rel="stylesheet" href="styles.css?v=20261105-2">
+<script defer src="core.js?v=20261105-2"></script>
+<script defer src="challenge.js?v=20261105-2"></script>
+<script defer src="joy.js?v=20261105-2"></script>
+<script defer src="timer-alerts.js?v=20261105-2"></script>
+<script defer src="app.js?v=20261105-2"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to workout</a>
@@ -144,6 +144,14 @@
     </div>
   </div>
 </main>
+<dialog id="deload-dialog" class="spoiler-dialog" aria-labelledby="deload-title" aria-describedby="deload-copy">
+  <p class="eyebrow">A LITTLE CELEBRATION, A LIGHTER DAY</p>
+  <h2 id="deload-title">Amazing work! ★</h2>
+  <p id="deload-copy">Let's celebrate with a deload! Today, focus on form and control. Take your time, move with purpose, and enjoy the lighter targets.</p>
+  <div class="spoiler-actions">
+    <button id="deload-dismiss" class="button" type="button" autofocus>Let's take it light!</button>
+  </div>
+</dialog>
 <dialog id="catchup-dialog" class="spoiler-dialog" aria-labelledby="catchup-title" aria-describedby="catchup-copy">
   <p class="eyebrow">LET'S PICK UP WHERE YOU LEFT OFF</p>
   <h2 id="catchup-title">Time for a little catch-up?</h2>

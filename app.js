@@ -57,6 +57,17 @@
       ? "Progress reset for this session. Browser storage is unavailable."
       : "All progress for this challenge has been reset.";
   }
+  const celebratedDeloads = new Set();
+  function closeDeload() {
+    const dialog = $("deload-dialog");
+    if (dialog.open) dialog.close();
+  }
+  function celebrateDeload() {
+    if (days[selected - 1].kind !== "deload" || celebratedDeloads.has(selected)) return;
+    if (["catchup-dialog", "jump-dialog", "spoiler-dialog", "timer-finished-dialog"].some(id => $(id).open)) return;
+    celebratedDeloads.add(selected);
+    $("deload-dialog").showModal();
+  }
   let catchUpPromptedOn = null;
   function missedDays() { return days.filter(d => d.day < today.raw && !isComplete(d.day)); }
   function closeCatchUp() {
@@ -64,7 +75,7 @@
     if (dialog.open) dialog.close();
   }
   function offerCatchUp() {
-    if (catchUpPromptedOn === today.today || $("jump-dialog").open || $("spoiler-dialog").open || $("timer-finished-dialog").open) return;
+    if (catchUpPromptedOn === today.today || $("jump-dialog").open || $("spoiler-dialog").open || $("timer-finished-dialog").open || $("deload-dialog").open) return;
     const missed = missedDays();
     // Don't interrupt a workout the user has already gone back to finish.
     if (!missed.length || (selected < today.day && missed.some(d => d.day === selected))) return;
@@ -401,7 +412,7 @@
     $("storage-warning").hidden = !storageFailed;
   }
   function renderDay() {
-    disposeTimers(); finaleParty.stop(); hidePlanPreview();
+    disposeTimers(); finaleParty.stop(); hidePlanPreview(); closeDeload();
     $("navigation-notice").textContent = "";
     if (!canViewDay(selected)) {
       selected = today.day;
@@ -421,6 +432,7 @@
     $("next").hidden = selected === 30;
     if (selected < 30) goLink($("next"), selected + 1, "Next day →");
     renderExercises(d); renderProgress(); restoreTrackerCheckIn(); updateCompletion();
+    celebrateDeload();
   }
   function renderPlan() {
     const table = $("plan-table"); const head = document.createElement("thead"), row = document.createElement("tr");
@@ -542,6 +554,7 @@
     $("jump-cancel").addEventListener("click", closeJumpDialog);
     $("catchup-confirm").addEventListener("click", openMissedDay);
     $("catchup-cancel").addEventListener("click", closeCatchUp);
+    $("deload-dismiss").addEventListener("click", () => { closeDeload(); offerCatchUp(); });
     $("export").addEventListener("click", () => calendar(false));
     $("validate").addEventListener("click", () => calendar(true));
     document.addEventListener("click", event => {
