@@ -8,12 +8,12 @@
 <meta name="description" content="A cheerful monthly workout challenge with lighter deload days, timers, progress, and calendar reminders.">
 <title>Daily / Workout challenge</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css?v=20261104-1">
-<script defer src="core.js?v=20261104-1"></script>
-<script defer src="challenge.js?v=20261104-1"></script>
-<script defer src="joy.js?v=20261104-1"></script>
-<script defer src="timer-alerts.js?v=20261104-1"></script>
-<script defer src="app.js?v=20261104-1"></script>
+<link rel="stylesheet" href="styles.css?v=20261105-1">
+<script defer src="core.js?v=20261105-1"></script>
+<script defer src="challenge.js?v=20261105-1"></script>
+<script defer src="joy.js?v=20261105-1"></script>
+<script defer src="timer-alerts.js?v=20261105-1"></script>
+<script defer src="app.js?v=20261105-1"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to workout</a>
@@ -135,7 +135,7 @@
         <div class="table-scroll" tabindex="0" role="region" aria-label="Full workout plan"><table id="plan-table"></table></div>
       </div>
     </section>
-    <footer><span>SMALL WINS DESERVE BIG HIGH FIVES.</span><span id="footer-month"></span></footer>
+    <footer><span>SMALL WINS DESERVE BIG HIGH FIVES.</span><span id="footer-month"></span><time id="footer-deployed">Deployment date unavailable</time></footer>
     <div class="footer-tools">
       <button id="jump-open" class="reset-link" type="button">Lost your spot? Jump to day…</button>
       <p id="jump-status" class="small muted" role="status"></p>
@@ -144,6 +144,20 @@
     </div>
   </div>
 </main>
+<dialog id="catchup-dialog" class="spoiler-dialog" aria-labelledby="catchup-title" aria-describedby="catchup-copy">
+  <p class="eyebrow">LET'S PICK UP WHERE YOU LEFT OFF</p>
+  <h2 id="catchup-title">Time for a little catch-up?</h2>
+  <p id="catchup-copy"></p>
+  <div id="catchup-picker">
+    <label for="catchup-day">Which day would you like to go back to?</label>
+    <select id="catchup-day"></select>
+  </div>
+  <p class="small muted">Opening a missed day keeps your checkmarks as they are. Complete the workout when you're ready.</p>
+  <div class="spoiler-actions">
+    <button id="catchup-confirm" class="button" type="button" autofocus>Go to this day</button>
+    <button id="catchup-cancel" class="button secondary" type="button">Not now</button>
+  </div>
+</dialog>
 <dialog id="jump-dialog" class="spoiler-dialog" aria-labelledby="jump-title" aria-describedby="jump-help">
   <h2 id="jump-title">Pick up where you left off</h2>
   <p id="jump-help">Choose the day you want to resume. Earlier days will be marked done. Existing notes and later progress will be kept.</p>

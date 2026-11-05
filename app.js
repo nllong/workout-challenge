@@ -50,12 +50,67 @@
   function resetAllProgress() {
     if (!window.confirm("Reset all 30 days of " + config.title + " in this browser? This clears checkmarks, max logs, modifications, and RPE entries, and stops running timers. This cannot be undone.")) return;
     logs = {}; previewedDays.clear();
-    $("jump-status").textContent = ""; closeJumpDialog();
+    $("jump-status").textContent = ""; closeJumpDialog(); closeCatchUp();
     write(storageKey, logs);
     renderDay();
     $("reset-status").textContent = storageFailed
       ? "Progress reset for this session. Browser storage is unavailable."
       : "All progress for this challenge has been reset.";
+  }
+  let catchUpPromptedOn = null;
+  function missedDays() { return days.filter(d => d.day < today.raw && !isComplete(d.day)); }
+  function closeCatchUp() {
+    const dialog = $("catchup-dialog");
+    if (dialog.open) dialog.close();
+  }
+  function offerCatchUp() {
+    if (catchUpPromptedOn === today.today || $("jump-dialog").open || $("spoiler-dialog").open || $("timer-finished-dialog").open) return;
+    const missed = missedDays();
+    // Don't interrupt a workout the user has already gone back to finish.
+    if (!missed.length || (selected < today.day && missed.some(d => d.day === selected))) return;
+    catchUpPromptedOn = today.today;
+    const single = missed.length === 1;
+    $("catchup-copy").textContent = single
+      ? "Day " + missed[0].day + " is still unfinished. Ready to go back and complete it? One day at a time—you've got this!"
+      : "You have " + missed.length + " unfinished days. Which day would you like to go back to and complete? Pick up at your own pace.";
+    $("catchup-picker").hidden = single;
+    $("catchup-day").replaceChildren();
+    missed.forEach(d => {
+      const back = today.day - d.day;
+      const option = el("option", "", "Day " + d.day + (back > 0 ? " — " + back + (back === 1 ? " day back" : " days back") : ""));
+      option.value = String(d.day); $("catchup-day").append(option);
+    });
+    $("catchup-day").value = String(missed[0].day);
+    $("catchup-confirm").textContent = single ? "Go complete day " + missed[0].day : "Go to this day";
+    $("catchup-dialog").showModal();
+  }
+  function openMissedDay() {
+    const n = Number($("catchup-day").value);
+    if (!missedDays().some(d => d.day === n)) { closeCatchUp(); return; }
+    closeCatchUp();
+    logs[n] = { ...dayLog(n), resumeHere: true };
+    write(storageKey, logs);
+    selected = n; history.pushState({}, "", internalUrl(n)); renderDay();
+    $("day-title").tabIndex = -1; $("day-title").focus({ preventScroll: true });
+    $("day-title").scrollIntoView({ behavior: "auto", block: "start" });
+  }
+  async function showDeploymentDate() {
+    const label = $("footer-deployed");
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.protocol === "file:") {
+      label.textContent = "Local preview"; return;
+    }
+    label.textContent = "Deployment date unavailable";
+    try {
+      // GitHub Pages serves the published artifact timestamp in Last-Modified.
+      const response = await window.fetch(new URL("index.html", location.href).href, { method: "HEAD", cache: "no-store" });
+      const stamp = response.headers.get("Last-Modified");
+      const date = stamp ? new Date(stamp) : null;
+      if (!response.ok || !date || !Number.isFinite(date.getTime())) return;
+      label.textContent = "Last deployed: " + new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Denver", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short"
+      }).format(date);
+      label.setAttribute("datetime", date.toISOString());
+    } catch (_) { /* Keep the honest fallback if the host supplies no timestamp. */ }
   }
   function jumpSummary() {
     const n = Number($("jump-day").value);
@@ -485,6 +540,8 @@
     $("jump-day").addEventListener("change", jumpSummary);
     $("jump-confirm").addEventListener("click", restoreSpot);
     $("jump-cancel").addEventListener("click", closeJumpDialog);
+    $("catchup-confirm").addEventListener("click", openMissedDay);
+    $("catchup-cancel").addEventListener("click", closeCatchUp);
     $("export").addEventListener("click", () => calendar(false));
     $("validate").addEventListener("click", () => calendar(true));
     document.addEventListener("click", event => {
@@ -510,14 +567,16 @@
       if (C.localDate(config.timeZone, Date.now()) === lastLocalDate) return;
       refreshDate();
       if (!new URLSearchParams(location.search).has("day")) selected = today.day;
-      renderDay();
+      renderDay(); offerCatchUp();
     }, 30000);
     window.addEventListener("storage", event => {
       if (event.key !== storageKey && event.key !== null) return;
       const latest = read(storageKey); logs = latest && typeof latest === "object" && !Array.isArray(latest) ? latest : {}; renderDay();
     });
     window.addEventListener("pagehide", () => { disposeTimers(); finaleParty.stop(); hidePlanPreview(); });
-    window.addEventListener("pageshow", event => { if (event.persisted) { refreshDate(); renderDay(); } });
+    window.addEventListener("pageshow", event => { if (event.persisted) { refreshDate(); renderDay(); offerCatchUp(); } });
+    offerCatchUp();
+    void showDeploymentDate();
   } catch (err) {
     console.error("Workout challenge could not start:", err);
     $("challenge").hidden = true; const box = $("fatal"); box.hidden = false;
