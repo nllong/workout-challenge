@@ -273,3 +273,6 @@ select:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent);
 
 footer { flex-wrap: wrap; }
 #footer-deployed { flex-basis: 100%; font-size: .7rem; font-weight: 400; letter-spacing: 0; }
+
+.day-complete-button { width: 100%; min-height: 68px; margin-top: 24px; font-size: 1.2rem; }
+#day-complete-help { margin-top: 12px; }

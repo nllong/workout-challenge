@@ -46,16 +46,79 @@
     if (!canViewDay(selected)) { renderDay(); return; }
     renderProgress(); updateCompletion();
     if (n === 30 && nowComplete && !wasComplete) finaleParty.start();
+    if (n === selected && nowComplete && !wasComplete) { offerDayStatus(true); offerCatchUp(); }
+    if (!nowComplete) closeDayStatus();
   }
   function resetAllProgress() {
     if (!window.confirm("Reset all 30 days of " + config.title + " in this browser? This clears checkmarks, max logs, modifications, and RPE entries, and stops running timers. This cannot be undone.")) return;
-    logs = {}; previewedDays.clear();
+    logs = {}; previewedDays.clear(); statusPromptsSeen.clear(); closeDayStatus();
     $("jump-status").textContent = ""; closeJumpDialog(); closeCatchUp();
     write(storageKey, logs);
     renderDay();
     $("reset-status").textContent = storageFailed
       ? "Progress reset for this session. Browser storage is unavailable."
       : "All progress for this challenge has been reset.";
+  }
+  const statusPromptsSeen = new Set();
+  let statusNextDay = null;
+  function closeDayStatus() {
+    const dialog = $("day-status-dialog");
+    if (dialog.open) dialog.close();
+    statusNextDay = null;
+  }
+  function openStatusDay(n) {
+    if (!Number.isInteger(n) || n < 1 || n > 30) return;
+    if (n <= today.raw && !isUnlockedDay(n)) {
+      logs[n] = { ...dayLog(n), resumeHere: true }; write(storageKey, logs);
+    } else if (!isUnlockedDay(n)) previewedDays.add(n);
+    selected = n; history.pushState({}, "", internalUrl(n)); renderDay();
+    $("day-title").tabIndex = -1; $("day-title").focus({ preventScroll: true });
+    $("day-title").scrollIntoView({ behavior: "auto", block: "start" });
+  }
+  function offerDayStatus(force = false, landing = false) {
+    if (["catchup-dialog", "jump-dialog", "spoiler-dialog", "timer-finished-dialog", "deload-dialog"].some(id => $(id).open)) return;
+    let completedDay = selected;
+    if (!isComplete(completedDay)) {
+      // A home-page return after yesterday's workout offers today's next step.
+      if (!landing || new URLSearchParams(location.search).has("day") || today.raw < 2 || today.raw > 30 ||
+          missedDays().length || !isComplete(today.day - 1)) return;
+      completedDay = today.day - 1;
+    }
+    const past = completedDay < today.raw && completedDay < 30;
+    if (!past && missedDays().length) return;
+    const key = completedDay + ":" + today.today;
+    if (!force && statusPromptsSeen.has(key)) return;
+    statusPromptsSeen.add(key);
+    const finished = days.every(d => isComplete(d.day));
+    const hasNext = completedDay < 30;
+    statusNextDay = hasNext ? completedDay + 1 : null;
+    $("day-status-title").textContent = finished ? "Challenge complete! ★" : past ? "Day " + completedDay + " complete!" :
+      completedDay === 30 ? "Day 30 complete!" : completedDay === today.raw ? "You're up to date!" : "You're ahead of the game!";
+    $("day-status-copy").textContent = finished ? "All 30 days are done. Amazing work—enjoy your celebration!" : past ?
+      "Amazing work! Ready to go to day " + statusNextDay + "? You can finish your tracker note before moving on." :
+      completedDay === 30 ? "Your final workout is complete. Review your progress and finish any other days when you're ready." :
+      completedDay === today.raw ? "Come back tomorrow to see the workout, or take a sneak peek if you really want to know what's next." :
+      "This workout is complete. Come back when the next day arrives, or confirm a sneak peek ahead.";
+    $("day-status-next").hidden = !past || finished;
+    $("day-status-next").textContent = "Go to day " + statusNextDay;
+    $("day-status-peek").hidden = past || !hasNext || finished;
+    $("day-status-peek").textContent = completedDay === today.raw ? "Sneak peek at tomorrow" : "Sneak peek at the next day";
+    $("day-status-dialog").showModal();
+  }
+  function completeDay() {
+    if (isComplete(selected)) {
+      offerDayStatus(true);
+      if (missedDays().length && !$("day-status-dialog").open) { catchUpPromptedOn = null; offerCatchUp(); }
+      return;
+    }
+    const d = days[selected - 1], log = { ...dayLog(selected) };
+    if (d.kind === "test" && d.exercises.some(e => !Number.isInteger(log["max" + e.index]) || log["max" + e.index] < 0)) {
+      $("day-complete-help").textContent = "Enter your max for each exercise before completing this test day."; return;
+    }
+    disposeTimers();
+    if (d.kind === "rest") log.rest = true;
+    else d.exercises.forEach(e => { log["done" + e.index] = true; });
+    saveDay(selected, log); renderExercises(d);
   }
   const celebratedDeloads = new Set();
   function closeDeload() {
@@ -64,7 +127,7 @@
   }
   function celebrateDeload() {
     if (days[selected - 1].kind !== "deload" || celebratedDeloads.has(selected)) return;
-    if (["catchup-dialog", "jump-dialog", "spoiler-dialog", "timer-finished-dialog"].some(id => $(id).open)) return;
+    if (["catchup-dialog", "jump-dialog", "spoiler-dialog", "timer-finished-dialog", "day-status-dialog"].some(id => $(id).open)) return;
     celebratedDeloads.add(selected);
     $("deload-dialog").showModal();
   }
@@ -75,7 +138,7 @@
     if (dialog.open) dialog.close();
   }
   function offerCatchUp() {
-    if (catchUpPromptedOn === today.today || $("jump-dialog").open || $("spoiler-dialog").open || $("timer-finished-dialog").open || $("deload-dialog").open) return;
+    if (catchUpPromptedOn === today.today || $("jump-dialog").open || $("spoiler-dialog").open || $("timer-finished-dialog").open || $("deload-dialog").open || $("day-status-dialog").open) return;
     const missed = missedDays();
     // Don't interrupt a workout the user has already gone back to finish.
     if (!missed.length || (selected < today.day && missed.some(d => d.day === selected))) return;
@@ -373,6 +436,10 @@
   function updateCompletion() {
     const done = isComplete(selected), d = days[selected - 1];
     $("completed").hidden = !done;
+    $("day-complete").textContent = done ? "✓ Day complete" : "Day complete";
+    $("day-complete").setAttribute("aria-label", done ? "Day complete. See what's next." : "Mark this day and all its exercises complete");
+    $("day-complete-help").textContent = done ? "Saved! Add your RPE and tracker note below, or tap to see what's next." :
+      "Finished? Mark all exercises on this day done, then add your tracker note below.";
     $("finale-celebration").hidden = selected !== 30 || !done;
     $("completed").textContent = selected === 30 ? (d.kind === "finale" ? "★ Finale complete! Give yourself a big high five." : "★ Day 30 complete! Give yourself a big high five.") : d.kind === "deload" ? "★ Deload done! Lighter day, full gold star." : d.kind === "rest" ? "★ Recharge complete. Rest gets a gold star, too." : "★ Day complete! That deserves a happy dance.";
     const teaser = $("up-next"); teaser.replaceChildren(); teaser.hidden = !done;
@@ -412,7 +479,7 @@
     $("storage-warning").hidden = !storageFailed;
   }
   function renderDay() {
-    disposeTimers(); finaleParty.stop(); hidePlanPreview(); closeDeload();
+    disposeTimers(); finaleParty.stop(); hidePlanPreview(); closeDeload(); closeDayStatus();
     $("navigation-notice").textContent = "";
     if (!canViewDay(selected)) {
       selected = today.day;
@@ -432,7 +499,7 @@
     $("next").hidden = selected === 30;
     if (selected < 30) goLink($("next"), selected + 1, "Next day →");
     renderExercises(d); renderProgress(); restoreTrackerCheckIn(); updateCompletion();
-    celebrateDeload();
+    offerDayStatus(); celebrateDeload();
   }
   function renderPlan() {
     const table = $("plan-table"); const head = document.createElement("thead"), row = document.createElement("tr");
@@ -554,7 +621,16 @@
     $("jump-cancel").addEventListener("click", closeJumpDialog);
     $("catchup-confirm").addEventListener("click", openMissedDay);
     $("catchup-cancel").addEventListener("click", closeCatchUp);
-    $("deload-dismiss").addEventListener("click", () => { closeDeload(); offerCatchUp(); });
+    $("deload-dismiss").addEventListener("click", () => { closeDeload(); offerDayStatus(); offerCatchUp(); });
+    $("day-complete").addEventListener("click", completeDay);
+    $("day-status-stay").addEventListener("click", closeDayStatus);
+    $("day-status-next").addEventListener("click", () => {
+      const n = statusNextDay; closeDayStatus(); openStatusDay(n);
+    });
+    $("day-status-peek").addEventListener("click", () => {
+      const n = statusNextDay; closeDayStatus();
+      if (n) askToPreview(() => openStatusDay(n), "day " + n);
+    });
     $("export").addEventListener("click", () => calendar(false));
     $("validate").addEventListener("click", () => calendar(true));
     document.addEventListener("click", event => {
@@ -588,7 +664,7 @@
     });
     window.addEventListener("pagehide", () => { disposeTimers(); finaleParty.stop(); hidePlanPreview(); });
     window.addEventListener("pageshow", event => { if (event.persisted) { refreshDate(); renderDay(); offerCatchUp(); } });
-    offerCatchUp();
+    offerDayStatus(false, true); offerCatchUp();
     void showDeploymentDate();
   } catch (err) {
     console.error("Workout challenge could not start:", err);
